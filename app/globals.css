@@ -1,0 +1,74 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-display: "Space Grotesk", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-bg text-ink font-body antialiased;
+    background-image:
+      radial-gradient(ellipse 60% 40% at 15% 0%, rgba(47, 139, 255, 0.08), transparent),
+      radial-gradient(ellipse 50% 30% at 100% 20%, rgba(34, 211, 238, 0.05), transparent);
+    background-attachment: fixed;
+  }
+  h1, h2, h3, h4 {
+    @apply font-display tracking-tight text-ink;
+  }
+  a {
+    @apply underline-offset-4;
+  }
+  ::selection {
+    background: rgba(47, 139, 255, 0.35);
+    color: #fff;
+  }
+
+  /* Visible keyboard focus everywhere — no outline: none anywhere in this project */
+  :focus-visible {
+    outline: 2px solid theme("colors.accent.DEFAULT");
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+}
+
+@layer components {
+  /* Monospace "eyebrow" label used above section headings, e.g. `// about` */
+  .eyebrow {
+    @apply font-mono text-xs uppercase tracking-[0.18em] text-accent;
+  }
+
+  .terminal-caret::after {
+    content: "_";
+    @apply ml-0.5 inline-block animate-blink text-accent;
+  }
+
+  .card {
+    @apply rounded-xl border border-border bg-bg-elevated/60 backdrop-blur-sm transition-colors;
+  }
+  .card:hover {
+    @apply border-accent/40;
+  }
+
+  .tag-pill {
+    @apply inline-flex items-center rounded-full border border-border px-2.5 py-0.5 font-mono text-[11px] uppercase tracking-wide text-ink-muted transition-colors;
+  }
+  .tag-pill[data-active="true"] {
+    @apply border-accent/60 bg-accent-dim text-accent-soft;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

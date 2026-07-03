@@ -1,0 +1,47 @@
+---
+title: "Notes on job scheduling in HPC clusters"
+date: "2026-06-15"
+summary: "A deeper look at how scheduling policy shapes throughput and fairness on shared clusters."
+tags: ["hpc", "distributed-systems"]
+type: "long"
+---
+
+## Why scheduling policy matters
+
+On a shared HPC cluster, the scheduler is the difference between a system
+that feels usable and one that quietly wastes half its capacity. Two
+policies that behave identically under light load can diverge completely
+once the queue backs up.
+
+## Backfilling, briefly
+
+Most production schedulers (Slurm, PBS, LSF) support backfilling: letting
+smaller jobs jump ahead in the queue if doing so won't delay the job at the
+head of the line. A minimal reservation check looks roughly like this:
+
+```python
+def can_backfill(job, head_job, cluster_free_at):
+    """Return True if `job` can run now without delaying `head_job`."""
+    finish_time = now() + job.estimated_runtime
+    return finish_time <= cluster_free_at[head_job.required_nodes]
+```
+
+This is a simplification — real schedulers account for multiple reserved
+jobs, heterogeneous node pools, and runtime estimate error — but the core
+idea holds: predictability of runtime estimates matters as much as the
+scheduling algorithm itself.
+
+## Fairness vs. throughput
+
+Pure shortest-job-first maximizes throughput but starves large jobs.
+Pure FIFO is fair but leaves nodes idle while a huge job waits for enough
+free capacity. Most real deployments land on a weighted fair-share model,
+where a user's priority decays based on recent usage.
+
+## Where this gets interesting
+
+The hard part isn't the scheduling algorithm — it's the feedback loop
+between users, runtime estimates, and priority. Users learn to game
+whatever heuristic you publish. That's less a scheduling problem than an
+incentive design problem, which is part of why I find this area more
+interesting than it first appears.

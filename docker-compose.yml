@@ -1,0 +1,37 @@
+# One-command self-hosted deploy:
+#   docker compose up -d --build
+#
+# By default this exposes the site on port 3000. The optional `caddy`
+# service below gives you automatic HTTPS on your own domain — set
+# DOMAIN and uncomment it if you want that instead of putting your own
+# reverse proxy in front.
+
+services:
+  web:
+    build:
+      context: .
+      args:
+        GITHUB_USERNAME: BradyBangasser
+        # GITHUB_TOKEN: ${GITHUB_TOKEN}   # optional, raises GitHub API rate limit
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+
+  # caddy:
+  #   image: caddy:2-alpine
+  #   restart: unless-stopped
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - ./Caddyfile:/etc/caddy/Caddyfile
+  #     - caddy_data:/data
+  #     - caddy_config:/config
+  #   depends_on:
+  #     - web
+
+# volumes:
+#   caddy_data:
+#   caddy_config:

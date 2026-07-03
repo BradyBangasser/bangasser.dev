@@ -1,0 +1,9 @@
+# Example Caddyfile for automatic HTTPS in front of the `web` service.
+# Uncomment the `caddy` service in docker-compose.yml, then:
+#   1. Point bangasser.dev's DNS A/AAAA record at this server
+#   2. Replace the domain below if different
+#   3. docker compose up -d --build
+
+bangasser.dev {
+    reverse_proxy web:3000
+}
