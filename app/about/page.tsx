@@ -1,13 +1,17 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { siteConfig } from "@/lib/site-config";
+import { publicFileExists } from "@/lib/photo";
 
 export const metadata: Metadata = {
   title: "About",
-  description: `Background and research focus for ${siteConfig.name}.`,
+  description: `Background and focus for ${siteConfig.name}.`,
 };
 
 export default function AboutPage() {
   const paragraphs = siteConfig.bio.trim().split(/\n\n+/);
+  const { src: aboutSrc, alt: aboutAlt } = siteConfig.photo.about;
+  const hasAboutPhoto = publicFileExists(aboutSrc);
 
   return (
     <div className="mx-auto max-w-page px-6 py-14 sm:py-20">
@@ -22,6 +26,18 @@ export default function AboutPage() {
         </div>
 
         <div className="space-y-8">
+          {hasAboutPhoto && (
+            <div className="relative aspect-[4/3] overflow-hidden rounded-xl border border-border bg-bg-elevated">
+              <Image
+                src={aboutSrc}
+                alt={aboutAlt}
+                fill
+                sizes="(max-width: 1024px) 90vw, 420px"
+                className="object-cover"
+              />
+            </div>
+          )}
+
           <div>
             <h2 className="eyebrow mb-3">education</h2>
             {siteConfig.education.map((e) => (

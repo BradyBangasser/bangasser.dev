@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BootSequence } from "@/components/BootSequence";
+import { ProfilePortrait } from "@/components/ProfilePortrait";
 import { PostCard } from "@/components/PostCard";
 import { ProjectCard } from "@/components/ProjectCard";
 import { getAllPosts, getAllProjects } from "@/lib/content";
@@ -15,11 +15,11 @@ export default function HomePage() {
   return (
     <>
       {/* Hero */}
-      <section className="mx-auto max-w-page px-6 pb-16 pt-14 sm:pt-20">
-        <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:gap-16">
+      <section className="mx-auto max-w-page px-6 pb-20 pt-14 sm:pt-24">
+        <div className="grid gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-center lg:gap-16">
           <div>
             <p className="eyebrow mb-4">// {siteConfig.role}</p>
-            <h1 className="text-3xl font-semibold leading-[1.1] sm:text-4xl md:text-5xl">
+            <h1 className="text-4xl font-semibold leading-[1.05] sm:text-5xl">
               {siteConfig.name}
             </h1>
             <p className="mt-5 max-w-prose text-base text-ink-muted sm:text-lg">
@@ -41,14 +41,14 @@ export default function HomePage() {
             </div>
           </div>
           <div className="flex justify-center lg:justify-end">
-            <BootSequence />
+            <ProfilePortrait />
           </div>
         </div>
       </section>
 
-      {/* Focus areas — real text content mirrors the boot sequence for SEO/accessibility */}
-      <section className="border-t border-border-subtle bg-bg-elevated/40">
-        <div className="mx-auto max-w-page px-6 py-14">
+      {/* Focus areas */}
+      <section className="border-t border-border-subtle">
+        <div className="mx-auto max-w-page px-6 py-16">
           <p className="eyebrow mb-6">// focus areas</p>
           <div className="grid gap-4 sm:grid-cols-2">
             {siteConfig.focusAreas.map((area) => (
@@ -63,17 +63,19 @@ export default function HomePage() {
 
       {/* Featured projects */}
       {fallbackProjects.length > 0 && (
-        <section className="mx-auto max-w-page px-6 py-14">
-          <div className="mb-6 flex items-end justify-between">
-            <p className="eyebrow">// projects</p>
-            <Link href="/projects" className="font-mono text-xs text-ink-muted no-underline hover:text-accent">
-              view all →
-            </Link>
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {fallbackProjects.map((project) => (
-              <ProjectCard key={project.slug} project={project} />
-            ))}
+        <section className="border-t border-border-subtle">
+          <div className="mx-auto max-w-page px-6 py-16">
+            <div className="mb-6 flex items-end justify-between">
+              <p className="eyebrow">// projects</p>
+              <Link href="/projects" className="font-mono text-xs text-ink-muted no-underline hover:text-accent">
+                view all →
+              </Link>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {fallbackProjects.map((project) => (
+                <ProjectCard key={project.slug} project={project} />
+              ))}
+            </div>
           </div>
         </section>
       )}
@@ -81,7 +83,7 @@ export default function HomePage() {
       {/* Recent posts */}
       {posts.length > 0 && (
         <section className="border-t border-border-subtle">
-          <div className="mx-auto max-w-page px-6 py-14">
+          <div className="mx-auto max-w-page px-6 py-16">
             <div className="mb-6 flex items-end justify-between">
               <p className="eyebrow">// writing</p>
               <Link href="/blog" className="font-mono text-xs text-ink-muted no-underline hover:text-accent">
@@ -98,12 +100,12 @@ export default function HomePage() {
       )}
 
       {/* Consulting teaser */}
-      <section className="border-t border-border-subtle bg-bg-elevated/40">
-        <div className="mx-auto max-w-page px-6 py-14">
+      <section className="border-t border-border-subtle">
+        <div className="mx-auto max-w-page px-6 py-16">
           <p className="eyebrow mb-3">// consulting</p>
           <h2 className="max-w-prose text-xl font-medium text-ink sm:text-2xl">
-            Software consulting and ML model penetration testing, for teams that
-            need senior systems expertise on a project basis.
+            Reliability, cloud security, and infrastructure consulting for teams
+            that need senior systems help on a project basis.
           </h2>
           <Link
             href="/consulting"

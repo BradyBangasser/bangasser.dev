@@ -4,7 +4,7 @@ import { siteConfig } from "@/lib/site-config";
 export const metadata: Metadata = {
   title: "Consulting",
   description:
-    "General software consulting and machine learning model penetration testing services.",
+    "Site reliability, cloud security, DevOps, HPC, and ML security consulting.",
 };
 
 export default function ConsultingPage() {
@@ -13,14 +13,16 @@ export default function ConsultingPage() {
       <p className="eyebrow mb-4">// consulting</p>
       <h1 className="text-3xl font-semibold sm:text-4xl">Consulting</h1>
       <p className="mt-4 max-w-prose text-ink-muted">
-        I take on a limited number of consulting engagements alongside my
-        research, focused on systems, infrastructure, and security work.
+        {siteConfig.consulting.intro}
       </p>
 
       <div className="mt-10 grid gap-4 sm:grid-cols-2">
-        {siteConfig.consulting.services.map((service) => (
+        {siteConfig.consulting.services.map((service, i) => (
           <div key={service.title} className="card px-6 py-6">
-            <h2 className="text-lg font-medium text-ink">{service.title}</h2>
+            <span className="font-mono text-xs text-ink-faint">
+              {String(i + 1).padStart(2, "0")}
+            </span>
+            <h2 className="mt-2 text-lg font-medium text-ink">{service.title}</h2>
             <p className="mt-2 text-sm text-ink-muted">{service.description}</p>
           </div>
         ))}

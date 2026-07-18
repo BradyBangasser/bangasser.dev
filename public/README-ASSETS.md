@@ -1,11 +1,17 @@
-# public/
+# Static assets
 
-Static files placed here are served as-is at the site root.
+Drop the following files here in `public/`:
 
-- **resume.pdf** — the Resume page links to `/resume.pdf` and expects a file
-  at `public/resume.pdf`. Add yours here.
-- Any other static assets (images referenced from MDX via absolute paths,
-  extra icons, etc.) go here too.
+- **brady-headshot.jpg** — hero portrait on the home page. Recommended:
+  a clean, well-lit professional headshot, roughly 4:5 (portrait), at least
+  800×1000px. Referenced by `siteConfig.photo.hero`.
+- **brady-flying.jpg** — the flying photo on the About page. Roughly 4:3,
+  at least 1000px wide. Referenced by `siteConfig.photo.about`.
+- **resume.pdf** — the Resume page links to `/resume.pdf`.
 
-This file itself is not served — it's just a note. Delete it once you've
-added real assets, or leave it, it won't affect the site.
+Until a photo file exists, the site falls back gracefully (the hero shows a
+monogram; the About photo is simply omitted) — so it never renders a broken
+image. To change filenames or paths, edit `siteConfig.photo` in
+`lib/site-config.ts`.
+
+This file itself is not served — it's just a note.

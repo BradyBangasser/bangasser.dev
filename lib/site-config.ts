@@ -5,46 +5,60 @@
 
 export const siteConfig = {
   name: "Brady Bangasser",
-  role: "Systems Engineer — HPC, Cloud Infrastructure & Security",
+  role: "Platform & Site Reliability Engineering",
   tagline:
-    "I build and break large-scale systems: HPC pipelines, compilers, cloud infrastructure, and the cryptography holding it all together.",
+    "I build and operate large-scale systems to stay fast, available, and secure, across HPC, multi-cloud infrastructure, and the automation that ships them.",
   url: "https://bangasser.dev",
   email: "brady@bangasser.dev",
-  location: "Ames, Iowa",
+  location: "Minneapolis, Minnesota",
 
-  bio: `I'm a computer scientist finishing my Master's in Computer Science at Iowa
-State University, researching compilers, distributed computing, cryptography,
-and cloud architecture. My work sits at the intersection of high-performance
-systems and security — I care about software that's both fast and hard to
-break.
+  // Photos. Drop the files in /public and point to them here.
+  // Leave `src` as "" to fall back to a clean monogram instead of a broken image.
+  photo: {
+    hero: {
+      src: "/brady-headshot.jpg",
+      alt: "Brady Bangasser",
+    },
+    about: {
+      src: "/brady-flying.jpg",
+      alt: "Brady Bangasser at the controls of a small aircraft",
+    },
+  },
 
-Outside of research, I work across DevOps, cloud security and architecture,
-build systems, and HPC infrastructure end to end — from the compiler that
-turns your code into instructions, to the cluster that runs it, to the
-network that has to be trusted to do so safely.
+  bio: `I'm a computer scientist finishing my Master's at Iowa State University,
+where I also run production HPC infrastructure and research compiler and
+systems performance. My focus is reliability and platform work: keeping
+large-scale systems fast, available, and secure, and making them easier to
+operate.
 
-When I'm not at a terminal, I'm usually climbing or flying.`,
+That spans the whole stack — high-availability cluster and cloud
+infrastructure, observability and incident response, infrastructure as code,
+and the CI that ships it. Underneath, I work close to the metal: distributed
+systems, compiler and toolchain internals, and the cryptography and
+authentication that keep it all trustworthy.
+
+When I'm not at a terminal, I'm usually flying or climbing.`,
 
   focusAreas: [
     {
-      title: "HPC Systems",
+      title: "Reliability & Platform",
       description:
-        "Cluster architecture, scheduling, performance tuning, and distributed computing at scale.",
+        "High-availability systems, observability, and self-healing infrastructure built to survive failure — not just avoid it.",
     },
     {
-      title: "Compilers",
+      title: "Cloud & Infrastructure",
       description:
-        "Toolchains, build systems, and the translation layer between source code and hardware.",
+        "Multi-cloud and on-prem infrastructure as code, least-privilege IAM, and security hardened to recognized standards.",
     },
     {
-      title: "Cryptography & Auth",
+      title: "HPC & Distributed Systems",
       description:
-        "Applied cryptography, authentication systems, and the primitives that secure them.",
+        "Cluster operations at scale — SLURM and Kubernetes scheduling, performance tuning, and distributed workloads.",
     },
     {
-      title: "Cloud Infrastructure & Security",
+      title: "Systems & Security",
       description:
-        "Cloud architecture, DevOps, and security posture from the network layer up.",
+        "Low-level performance work, compiler and toolchain internals, and applied cryptography and authentication.",
     },
   ],
 
@@ -54,16 +68,16 @@ When I'm not at a terminal, I'm usually climbing or flying.`,
       degree: "M.S. Computer Science",
       period: "Expected 2027",
       detail:
-        "Research focus: compilers, distributed computing, cryptography, and cloud architecture.",
+        "Concurrent B.S./M.S. Focus on high-performance computing, distributed systems, and compiler optimization.",
     },
   ],
 
-  interests: ["Rock climbing", "Flying"],
+  interests: ["Flying", "Rock climbing"],
 
   social: {
     github: "https://github.com/BradyBangasser",
     // Fill these in as they go live — leave blank ("") to hide the link.
-    linkedin: "",
+    linkedin: "https://linkedin.com/in/bbangasser",
     x: "",
     bluesky: "",
     orcid: "",
@@ -72,39 +86,69 @@ When I'm not at a terminal, I'm usually climbing or flying.`,
   },
 
   consulting: {
+    intro:
+      "I take on a limited number of engagements alongside research and coursework, focused on keeping systems reliable, operable, and secure. Below is where I'm most useful.",
     services: [
       {
-        title: "General Software Consulting",
+        title: "Site Reliability & Platform Engineering",
         description:
-          "Architecture review, build/CI systems, infrastructure design, and hands-on implementation for teams that need senior systems expertise on a project basis.",
+          "Observability, incident response, CI/CD, and infrastructure automation that make services more reliable and far easier to operate.",
+      },
+      {
+        title: "Cloud Security",
+        description:
+          "Cloud posture review, least-privilege IAM, and hardening across AWS, Azure, and GCP against NIST and platform best practices.",
+      },
+      {
+        title: "DevOps & Infrastructure as Code",
+        description:
+          "Reproducible infrastructure with Terraform, Packer, and containers, spanning multi-cloud and on-prem environments.",
+      },
+      {
+        title: "HPC & Systems Consulting",
+        description:
+          "Cluster setup, scheduling, and performance tuning for compute-heavy research and production workloads.",
       },
       {
         title: "ML Model Penetration Testing",
         description:
-          "Adversarial evaluation of machine learning systems — model extraction, evasion, data leakage, and infrastructure-level attack surface around deployed models.",
+          "Adversarial evaluation of machine learning systems — model extraction, evasion, data leakage, and the attack surface around deployed models.",
       },
     ],
     contactNote:
-      "The fastest way to reach me is email. Include a short summary of the problem, rough timeline, and whether this is a one-time engagement or ongoing work.",
+      "Email is the fastest way to reach me. Include a short summary of the problem, a rough timeline, and whether it's a one-time engagement or ongoing work.",
   },
 
   seo: {
-    defaultTitle: "Brady Bangasser — HPC, Cloud & Security",
+    defaultTitle: "Brady Bangasser - HPC AI & Platform & Site Reliability Engineering",
     titleTemplate: "%s — Brady Bangasser",
     defaultDescription:
-      "Brady Bangasser is a computer scientist working on HPC systems, compilers, cryptography, and cloud infrastructure security.",
+      "Brady Bangasser is a platform and site reliability engineer working on high-availability infrastructure, HPC, cloud security, and distributed systems.",
     keywords: [
+      "Bangasser",
+      "iowa state",
+      "datacenter",
+      "ames",
+      "data center",
       "Brady Bangasser",
-      "HPC",
-      "high performance computing",
+      "site reliability engineering",
+      "SRE",
+      "platform engineering",
+      "reliability engineering",
+      "observability",
+      "incident response",
+      "high availability",
+      "infrastructure as code",
+      "Terraform",
+      "Kubernetes",
       "cloud infrastructure",
       "cloud security",
-      "cryptography",
-      "compilers",
-      "distributed computing",
-      "ML security",
-      "ML penetration testing",
       "DevOps",
+      "HPC",
+      "high performance computing",
+      "distributed systems",
+      "compilers",
+      "cryptography",
       "Iowa State University",
     ],
   },
