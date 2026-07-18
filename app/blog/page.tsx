@@ -27,13 +27,6 @@ export default async function BlogPage({
     <div className="mx-auto max-w-page px-6 py-14 sm:py-20">
       <p className="eyebrow mb-4">// blog</p>
       <h1 className="text-3xl font-semibold sm:text-4xl">Blog</h1>
-      <p className="mt-3 max-w-prose text-ink-muted">
-        Short notes and longer deep dives. Add a post by dropping an .mdx file
-        into <code className="font-mono text-accent-soft">/content/blog</code>{" "}
-        with <code className="font-mono text-accent-soft">type: &quot;short&quot;</code> or{" "}
-        <code className="font-mono text-accent-soft">&quot;long&quot;</code>.
-      </p>
-
       {tags.length > 0 && (
         <div className="mt-8">
           <Suspense fallback={null}>

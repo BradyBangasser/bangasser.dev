@@ -1,0 +1,218 @@
+---
+title: "Building a rootless edge: Traefik, Podman, and per-container TLS"
+date: "2026-07-18"
+summary: "How I built a self-registering reverse proxy on rootless Podman with per-domain TLS, a private CA, and multi-cloud portability, and where I chose it over Kubernetes."
+tags: ["sre", "platform", "traefik", "podman", "tls", "security"]
+type: "long"
+---
+## What I built
+
+I set up an edge layer for a group of small services: a single Traefik
+instance running rootless under Podman, doing host-based routing, and
+terminating TLS for public hostnames through Let's Encrypt and for internal
+hostnames through a self-hosted step-ca. Backends register themselves with
+container labels and join a shared external network, so adding a service is
+a single `compose up` that the proxy picks up within about a second — no
+change to the proxy's own configuration.
+
+```
+                          Internet
+                             │
+                     DNS (Cloudflare)
+                    public A / TXT records
+                             │
+                             ▼
+        ┌───────────────────────────────────────────┐
+        │            Host  (rootless Podman)        │
+        │                                           │
+        │   ┌───────────┐   reads (ro)   ┌────────┐ │
+        │   │  Traefik  │◄───────────────│ podman │ │
+        │   │   :80/:443│    socket      │  sock  │ │
+        │   └─────┬─────┘                └────────┘ │
+        │         │ routes by Host() label          │
+        │         │                                 │
+        │   ┌─────┴──────┬──────────────┐           │
+        │   ▼            ▼              ▼           │
+        │ whoami      service-b      step-ca        │
+        │ (LE cert)   (LE cert)   (internal CA,     │
+        │                          issues to ─┐     │
+        │         proxy network  ◄────────────┘     │
+        │   internal issuance path (step-ca:9000)   │
+        └───────────────────────────────────────────┘
+             LE resolver ── DNS-01 ──► Cloudflare API
+                     (outbound only, no inbound :80)
+```
+
+## Why not Kubernetes
+
+I evaluated a Kubernetes-based setup and chose against it for this footprint.
+The two things I optimized for were multi-cloud portability and keeping the
+standing cost close to the cost of the compute itself.
+
+The architectural difference underneath both is control-plane topology.
+Kubernetes is centralized: every node depends on a control plane — API
+server, etcd, scheduler — and a node that loses the control plane is a node
+that can't do much. The rootless model is the opposite. Each host is an
+autonomous peer that carries its own routing, its own certificate issuance,
+and its own service definitions, with no central brain it reports to and no
+shared state it depends on to keep serving. That autonomy is lighter to
+operate and easier to reason about at this scale, and it's the property that a
+peer-to-peer, mesh-based fleet would build on rather than fight against
+(covered under future work).
+
+On cost, the comparison is direct. An EKS control plane is $72/month before
+a single workload runs, and once the EC2 or Fargate capacity behind it is
+counted, a modest cluster reaches several hundred dollars a month. For a
+home-lab-scale deployment and a set of small applications, that baseline is
+the dominant line item — I'd be paying more for the orchestrator than for the
+things it orchestrates.
+
+The rootless approach removes that baseline. A service definition is portable
+to any host with Podman and an SSH key, with no managed cluster, no
+per-cluster networking model, and no spend before the first request. That
+portability is also what makes it multi-cloud in a way that's cheap to act on:
+the same compose file runs on an Azure instance in Central US and on a
+cheaper provider elsewhere, and I can place a workload wherever the compute
+is cheapest or wherever I need regional presence without re-platforming. If
+Central US is where I want low latency, I run there; if another region or
+provider is cheaper for a batch workload, the definition moves unchanged.
+
+The DNS-01 challenge is part of what makes that portability real. Because
+certificate validation happens over an outbound API call to the DNS provider
+rather than an inbound request to port 80, I never open a port or reconcile a
+security-group rule per cloud to get certificates. The same TLS setup works
+identically on every provider, behind any firewall, including hosts with no
+inbound public access at all. HTTP-01 validation would have tied me to
+per-provider inbound configuration; DNS-01 makes the cert layer provider-
+agnostic.
+
+The trade-off is centralization. There's no single API describing the whole
+fleet, no built-in scheduler placing workloads, and no cluster-wide health
+view unless I build one. Running replicas of a single service within one
+instance or region — the thing Kubernetes makes trivial — is not something
+this design does for free. That's a real limitation, covered below rather than
+glossed over.
+
+## Fit for AI/ML workloads
+
+The same properties that make this cheap and portable line up well with the
+economics of machine learning, where the cost profile is unusual: the compute
+is expensive and the orchestration around it is not the interesting spend.
+
+The strongest fit is GPU cost arbitrage. GPU capacity dominates the bill for
+both training and inference, and spot and on-demand GPU pricing swings widely
+across clouds and regions. A deployment that moves unchanged between an Azure
+instance in Central US and a cheaper provider elsewhere lets me place a job
+wherever GPU capacity is cheapest at the time, rather than being anchored to
+one provider's cluster. Against a GPU bill, the control-plane savings are
+almost incidental — but the portability that produces them is exactly what
+makes chasing cheaper capacity practical.
+
+For deployment, serving a model becomes the same one-step operation as any
+other service: label the container and it gets a public HTTPS endpoint through
+the proxy automatically, with a valid certificate. Standing up an inference
+endpoint is a `compose up`, and scaling out is adding peers rather than
+reconfiguring a cluster.
+
+The NAT-friendliness matters here too. Training hosts often live in varied
+environments — a rented GPU box, a machine behind a home or lab firewall — and
+because certificate issuance is outbound-only, those nodes need no inbound
+exposure at all. They can pull work and serve results without a public
+ingress path.
+
+The honest boundary: tightly-coupled, multi-node distributed training — the
+kind that needs gang scheduling and high-bandwidth interconnect — is where
+Kubernetes with Kubeflow or Volcano, or a purpose-built scheduler like Slurm,
+genuinely earns its complexity. This design fits single-node training jobs and
+inference serving well; it is not where I'd run synchronous multi-node
+training. Knowing which side of that line a workload falls on is the whole
+decision.
+
+## Security decisions
+
+**Rootless as the default posture.** The proxy runs as an ordinary
+unprivileged user, which is why it can't bind ports 80 and 443 directly.
+Reclaiming real 443 is a deliberate, auditable step, lowering the
+unprivileged-port floor via sysctl, or placing a fronting listener, rather
+than something that happens by default. The edge has no standing path to root.
+
+**The runtime socket is the sensitive boundary.** Traefik discovers backends
+by reading the Podman socket, and access to that socket is effectively
+control over the host's containers. I mount it read-only and scope the
+container's access to it, since a proxy that could be induced to write to that
+socket could launch arbitrary workloads. It's the most security-relevant line
+in the configuration.
+
+**Certificates are managed per container.** Each backend declares, in its own
+labels, the hostname it answers for and which issuer certifies it — Let's
+Encrypt for a publicly-trusted certificate, or the private step-ca for an
+internal one. The proxy reads those labels and requests, stores, and renews a
+distinct certificate per container, selecting the right one by SNI at the
+handshake. Nothing is defined centrally: a container owns its own TLS
+identity, and adding one with its own certificate is a label change on that
+container alone. Two issuers are available because the fleet spans public and
+internal names, but the choice is made per container rather than by a global
+rule, and the same discipline keeps the trust boundaries clean — a public name
+points at the public issuer, an internal name at the private one, each decided
+where the service is defined.
+
+**Fronting the CA without a bootstrap loop.** step-ca sits behind the same
+Traefik that depends on it for internal certificates. To avoid a cold-start
+deadlock, the proxy's own issuance path reaches step-ca directly over the
+internal network by container name, while the public `ca.bangasser.dev`
+hostname is reserved for external clients. Internal certificate issuance never
+traverses the route it would otherwise be trying to certify.
+
+## Observability
+
+Health and metrics are collected through Prometheus. Traefik exposes request
+rates, latencies, and per-router status as Prometheus metrics, and each host
+reports its own container and system metrics, which Prometheus scrapes and
+aggregates into the fleet-wide view that the design otherwise lacks by
+default. Because there's no cluster-level API providing a single source of
+truth, this aggregation layer is where the "whole system" actually becomes
+visible.
+
+## Future work and known limits
+
+This design is deliberately scoped to a single operator and a small number of
+hosts. The points where it stops fitting are specific:
+
+- **No in-region replication or automatic failover.** systemd gives me
+  restart-on-crash for a container, but not reschedule-on-node-loss. If a host
+  goes down, what it served is unavailable until another host is brought up to
+  take over, and that failover is something I have to design rather than
+  inherit. This is the clearest gap versus an orchestrator and the first thing
+  I'd address.
+- **Single-host service discovery.** Traefik reads one host's Podman socket,
+  so it only routes to backends on its own host. Cross-host routing requires
+  the file provider or an additional discovery mechanism — at which point I'm
+  rebuilding a piece of what a scheduler provides.
+- **Manual placement.** Workloads land where I put them; there's no
+  bin-packing or scheduling across a pool.
+- **Operator-bound inventory.** With no cluster-wide control plane, the fleet
+  is only as legible as the tooling I build around it. This works at a scale
+  that fits in one person's head and degrades past it.
+
+The direction I'm most interested in is turning the autonomous-peer property
+into an actual highly-available peer network. Each host is already
+self-sufficient; what's missing is a flat network tying hosts together across
+clouds and a failover mechanism in front. A mesh overlay — WireGuard directly,
+or Tailscale/Nebula on top of it — would give every host a stable address to
+every other regardless of provider or NAT, letting Traefik on any peer route
+to a backend on any other through the file provider. Paired with DNS-level
+failover, that converts today's single-node setup into a decentralized fleet
+with no central control plane and no single point of failure — the HA story
+this architecture is shaped for, without adopting a centralized scheduler to
+get it.
+
+Short of that, a reasonable next step is a lightweight orchestrator — Nomad,
+Swarm, or k3s —
+which would provide the replica placement and cross-host scheduling this setup
+lacks. I deferred that because each reintroduces the standing cost and failure
+surface I was avoiding: a control plane with its own cluster state to operate,
+an overlay network, and a scheduling layer between me and the primitives. For
+now, operating close to plain Linux is the more useful place to be, both for
+cost and for understanding the mechanisms directly. The point where uptime
+requirements or fleet size cross what a single node can hold is the point
+where that calculus changes.
