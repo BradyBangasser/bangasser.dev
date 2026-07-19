@@ -8,7 +8,7 @@ export const siteConfig = {
   role: "Platform & Site Reliability Engineering",
   tagline:
     "I build and operate large-scale systems to stay fast, available, and secure, across HPC, multi-cloud infrastructure, and the automation that ships them.",
-  url: "https://bangasser.dev",
+  url: "https://www.bangasser.dev",
   email: "brady@bangasser.dev",
   location: "Minneapolis, Minnesota",
 
@@ -16,11 +16,11 @@ export const siteConfig = {
   // Leave `src` as "" to fall back to a clean monogram instead of a broken image.
   photo: {
     hero: {
-      src: "/brady-headshot.jpg",
+      src: "/photos/brady-hero.jpg",
       alt: "Brady Bangasser",
     },
     about: {
-      src: "/brady-flying.jpg",
+      src: "/photos/brady-about.jpg",
       alt: "Brady Bangasser at the controls of a small aircraft",
     },
   },

@@ -34,123 +34,183 @@
   "files": {
     "sre-onepage-designed": {
       "file": "/resumes/resume-sre-onepage-designed.pdf",
+      "data": "/resumes/data/sre-onepage-designed.json",
+      "template": "designed",
       "pages": 1
     },
     "sre-onepage-ats": {
       "file": "/resumes/resume-sre-onepage-ats.pdf",
+      "data": "/resumes/data/sre-onepage-ats.json",
+      "template": "ats",
       "pages": 1
     },
     "sre-twopage-designed": {
       "file": "/resumes/resume-sre-twopage-designed.pdf",
+      "data": "/resumes/data/sre-twopage-designed.json",
+      "template": "designed",
       "pages": 2
     },
     "sre-twopage-ats": {
       "file": "/resumes/resume-sre-twopage-ats.pdf",
+      "data": "/resumes/data/sre-twopage-ats.json",
+      "template": "ats",
       "pages": 2
     },
     "sre-full-designed": {
       "file": "/resumes/resume-sre-full-designed.pdf",
+      "data": "/resumes/data/sre-full-designed.json",
+      "template": "designed",
       "pages": 2
     },
     "sre-full-ats": {
       "file": "/resumes/resume-sre-full-ats.pdf",
+      "data": "/resumes/data/sre-full-ats.json",
+      "template": "ats",
       "pages": 2
     },
     "cloud-onepage-designed": {
       "file": "/resumes/resume-cloud-onepage-designed.pdf",
+      "data": "/resumes/data/cloud-onepage-designed.json",
+      "template": "designed",
       "pages": 1
     },
     "cloud-onepage-ats": {
       "file": "/resumes/resume-cloud-onepage-ats.pdf",
+      "data": "/resumes/data/cloud-onepage-ats.json",
+      "template": "ats",
       "pages": 1
     },
     "cloud-twopage-designed": {
       "file": "/resumes/resume-cloud-twopage-designed.pdf",
+      "data": "/resumes/data/cloud-twopage-designed.json",
+      "template": "designed",
       "pages": 2
     },
     "cloud-twopage-ats": {
       "file": "/resumes/resume-cloud-twopage-ats.pdf",
+      "data": "/resumes/data/cloud-twopage-ats.json",
+      "template": "ats",
       "pages": 2
     },
     "cloud-full-designed": {
       "file": "/resumes/resume-cloud-full-designed.pdf",
+      "data": "/resumes/data/cloud-full-designed.json",
+      "template": "designed",
       "pages": 2
     },
     "cloud-full-ats": {
       "file": "/resumes/resume-cloud-full-ats.pdf",
+      "data": "/resumes/data/cloud-full-ats.json",
+      "template": "ats",
       "pages": 2
     },
     "hpc-onepage-designed": {
       "file": "/resumes/resume-hpc-onepage-designed.pdf",
+      "data": "/resumes/data/hpc-onepage-designed.json",
+      "template": "designed",
       "pages": 1
     },
     "hpc-onepage-ats": {
       "file": "/resumes/resume-hpc-onepage-ats.pdf",
+      "data": "/resumes/data/hpc-onepage-ats.json",
+      "template": "ats",
       "pages": 1
     },
     "hpc-twopage-designed": {
       "file": "/resumes/resume-hpc-twopage-designed.pdf",
-      "pages": 1
+      "data": "/resumes/data/hpc-twopage-designed.json",
+      "template": "designed",
+      "pages": 2
     },
     "hpc-twopage-ats": {
       "file": "/resumes/resume-hpc-twopage-ats.pdf",
+      "data": "/resumes/data/hpc-twopage-ats.json",
+      "template": "ats",
       "pages": 2
     },
     "hpc-full-designed": {
       "file": "/resumes/resume-hpc-full-designed.pdf",
+      "data": "/resumes/data/hpc-full-designed.json",
+      "template": "designed",
       "pages": 2
     },
     "hpc-full-ats": {
       "file": "/resumes/resume-hpc-full-ats.pdf",
+      "data": "/resumes/data/hpc-full-ats.json",
+      "template": "ats",
       "pages": 2
     },
     "compilers-onepage-designed": {
       "file": "/resumes/resume-compilers-onepage-designed.pdf",
+      "data": "/resumes/data/compilers-onepage-designed.json",
+      "template": "designed",
       "pages": 1
     },
     "compilers-onepage-ats": {
       "file": "/resumes/resume-compilers-onepage-ats.pdf",
+      "data": "/resumes/data/compilers-onepage-ats.json",
+      "template": "ats",
       "pages": 1
     },
     "compilers-twopage-designed": {
       "file": "/resumes/resume-compilers-twopage-designed.pdf",
-      "pages": 1
+      "data": "/resumes/data/compilers-twopage-designed.json",
+      "template": "designed",
+      "pages": 2
     },
     "compilers-twopage-ats": {
       "file": "/resumes/resume-compilers-twopage-ats.pdf",
-      "pages": 1
+      "data": "/resumes/data/compilers-twopage-ats.json",
+      "template": "ats",
+      "pages": 2
     },
     "compilers-full-designed": {
       "file": "/resumes/resume-compilers-full-designed.pdf",
+      "data": "/resumes/data/compilers-full-designed.json",
+      "template": "designed",
       "pages": 2
     },
     "compilers-full-ats": {
       "file": "/resumes/resume-compilers-full-ats.pdf",
+      "data": "/resumes/data/compilers-full-ats.json",
+      "template": "ats",
       "pages": 2
     },
     "software-onepage-designed": {
       "file": "/resumes/resume-software-onepage-designed.pdf",
+      "data": "/resumes/data/software-onepage-designed.json",
+      "template": "designed",
       "pages": 1
     },
     "software-onepage-ats": {
       "file": "/resumes/resume-software-onepage-ats.pdf",
+      "data": "/resumes/data/software-onepage-ats.json",
+      "template": "ats",
       "pages": 1
     },
     "software-twopage-designed": {
       "file": "/resumes/resume-software-twopage-designed.pdf",
+      "data": "/resumes/data/software-twopage-designed.json",
+      "template": "designed",
       "pages": 2
     },
     "software-twopage-ats": {
       "file": "/resumes/resume-software-twopage-ats.pdf",
+      "data": "/resumes/data/software-twopage-ats.json",
+      "template": "ats",
       "pages": 2
     },
     "software-full-designed": {
       "file": "/resumes/resume-software-full-designed.pdf",
-      "pages": 2
+      "data": "/resumes/data/software-full-designed.json",
+      "template": "designed",
+      "pages": 3
     },
     "software-full-ats": {
       "file": "/resumes/resume-software-full-ats.pdf",
-      "pages": 2
+      "data": "/resumes/data/software-full-ats.json",
+      "template": "ats",
+      "pages": 3
     }
   }
 }

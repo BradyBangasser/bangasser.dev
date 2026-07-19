@@ -10,7 +10,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "resumes": "cd resume && python3 export.py"
   },
   "dependencies": {
     "@fontsource/inter": "^5.2.8",

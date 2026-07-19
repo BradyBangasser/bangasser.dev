@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { siteConfig } from "@/lib/site-config";
 import { publicFileExists } from "@/lib/photo";
+import { ResumeHighlights } from "@/components/ResumeHighlights";
 
 export const metadata: Metadata = {
   title: "About",
@@ -55,7 +56,7 @@ export default function AboutPage() {
             <ul className="space-y-2">
               {siteConfig.focusAreas.map((f) => (
                 <li key={f.title} className="text-sm text-ink-muted">
-                  <span className="text-ink">{f.title}</span> — {f.description}
+                  <span className="text-ink">{f.title}</span> · {f.description}
                 </li>
               ))}
             </ul>
@@ -70,6 +71,10 @@ export default function AboutPage() {
             </div>
           )}
         </div>
+      </div>
+
+      <div className="mt-16 border-t border-border-subtle pt-12">
+        <ResumeHighlights />
       </div>
     </div>
   );

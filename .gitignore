@@ -27,3 +27,7 @@ next-env.d.ts
 
 # generated content snapshot (rebuilt automatically before every dev/build run)
 content/projects/_generated.json
+resume/build/
+resume/out/
+__pycache__/
+*.pyc
