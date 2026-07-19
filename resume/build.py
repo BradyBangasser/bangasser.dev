@@ -86,6 +86,26 @@ def pick_bullets(bullets, preset, length, budget):
     return [b["text"] for b in out]
 
 
+def top_bullets(bullets, n):
+    """Highest-priority bullets regardless of preset tags — used to top an
+    entry up to the minimum when preset-tagged points fall short."""
+    s = sorted(bullets, key=lambda b: b.get("priority", 1))
+    return [b["text"] for b in s[:n]]
+
+
+def pick_min(bullets, preset, length, budget, min_n):
+    """Preset-relevant bullets, topped up to at least min_n (by priority,
+    ignoring tags) when the tagged set is too small."""
+    chosen = pick_bullets(bullets, preset, length, budget)
+    if len(chosen) < min_n:
+        for t in top_bullets(bullets, len(bullets)):
+            if t not in chosen:
+                chosen.append(t)
+            if len(chosen) >= min_n:
+                break
+    return chosen
+
+
 def build_data(master: dict, preset: str, length: str) -> dict:
     budget = BUDGET[length]
     p = master["presets"][preset]
@@ -110,10 +130,11 @@ def build_data(master: dict, preset: str, length: str) -> dict:
     for x in sorted(master.get("experience", []), key=sort_key, reverse=True):
         if not has_tag(x.get("tags"), preset, length):
             continue
-        bullets = pick_bullets(x.get("bullets", []), preset, length, budget)
-        if not bullets:
-            continue
+        bullets = pick_min(x.get("bullets", []), preset, length, budget, 2)
+        if len(bullets) < 2:
+            continue  # every shown entry needs at least two points
         experience.append({
+            "id": x.get("id", x["org"]),
             "title": x["title"], "org": x["org"],
             "location": "" if length == "onepage" else x.get("location", ""),
             "dates": date_range(x.get("start", ""), x.get("end", "")),
@@ -126,10 +147,9 @@ def build_data(master: dict, preset: str, length: str) -> dict:
     for pr in master.get("projects", []):
         if not has_tag(pr.get("tags"), preset, length):
             continue
-        bullets = pick_bullets(pr.get("bullets", []), preset, length, budget)
-        bullets = bullets[:PROJECT_MAX_BULLETS]
-        if len(bullets) < 1:
-            continue
+        bullets = pick_min(pr.get("bullets", []), preset, length, budget, 2)[:PROJECT_MAX_BULLETS]
+        if len(bullets) < 2:
+            continue  # every shown project needs at least two points
         projects.append({
             "name": pr["name"], "period": pr.get("period", ""),
             "tech": pr.get("tech", []) if length != "onepage" else [],
@@ -176,32 +196,39 @@ def page_count(pdf: Path) -> int:
 
 
 def trim_once(data: dict) -> bool:
-    """Remove the least-important remaining item. Projects are kept at >= 2
-    bullets (dropped whole rather than trimmed below that). Returns False if
-    nothing further can be trimmed."""
+    """Shrink the resume by one step so the fit fills the page instead of
+    overshooting. Never trims an entry below two points — it drops the whole
+    entry first. Returns False when nothing else can go."""
+    exp, proj, edu = data["experience"], data["projects"], data["education"]
+    # 1. compact skills first (cheap, low signal)
     if len(data["skills"]) > 4:
         data["skills"].pop()
         return True
-    # trim trailing experience bullets down to a floor of 2
-    for x in reversed(data["experience"]):
+    # 2. shave a single bullet, but only down to a floor of two per entry
+    for x in reversed(exp):
         if len(x["bullets"]) > 2:
             x["bullets"].pop()
             return True
-    # then drop whole trailing projects (keeps shown projects at 2-3 bullets)
-    if len(data["projects"]) > 1:
-        data["projects"].pop()
-        return True
-    # then experience bullets down to a floor of 1
-    for x in reversed(data["experience"]):
-        if len(x["bullets"]) > 1:
-            x["bullets"].pop()
+    for pr in reversed(proj):
+        if len(pr["bullets"]) > 2:
+            pr["bullets"].pop()
             return True
-    if len(data["projects"]) > 0:
-        data["projects"].pop()
+    # 3. everything is at two points: drop whole trailing entries, keeping the
+    #    resume balanced (favor keeping experiences, the core of a resume)
+    if len(proj) > 1:
+        proj.pop()
         return True
-    if len(data["experience"]) > 2:
-        data["experience"].pop()
+    if len(exp) > 2:
+        exp.pop()
         return True
+    if len(proj) > 0:
+        proj.pop()
+        return True
+    # 4. last resort: shed education coursework lines (keep at least one)
+    for e in reversed(edu):
+        if len(e.get("lines", [])) > 1:
+            e["lines"].pop()
+            return True
     return False
 
 
@@ -211,24 +238,54 @@ def render(data: dict, template: str, out_pdf: Path):
     data_path = BUILD / "data.json"
     data_path.write_text(json.dumps(data, ensure_ascii=False, indent=2))
     tpl = TEMPLATES / TEMPLATE_FILES[template]
-    # Typst uses a virtual filesystem rooted at ROOT; templates read the data
-    # via a root-relative path (leading slash), not an absolute OS path.
-    typst.compile(str(tpl), output=str(out_pdf), root=str(ROOT),
-                  sys_inputs={"data": "/build/data.json"})
+    # Template reads the data from a fixed root-relative path (/build/data.json),
+    # so the same templates compile identically here and in the browser.
+    typst.compile(str(tpl), output=str(out_pdf), root=str(ROOT))
 
 
 def render_fit(data: dict, template: str, out_pdf: Path, max_pages):
-    """Render, then trim until it fits within max_pages. Starting from a
-    generous budget and trimming to the boundary fills the page."""
+    """Fit to a page count in two passes: trim to fit (never below two points
+    per entry), then grow bullets back to fill the remaining space. The result
+    uses all available space with every shown entry keeping at least two points."""
     render(data, template, out_pdf)
     if not max_pages:
         return
-    for _ in range(60):
+    # remember the full candidate bullets so we can regrow after trimming
+    pool_e = {x["id"]: list(x["bullets"]) for x in data["experience"]}
+    pool_p = {p["name"]: list(p["bullets"]) for p in data["projects"]}
+    caps_e, caps_p = 4, PROJECT_MAX_BULLETS
+
+    # pass 1 — trim to fit
+    for _ in range(80):
         if page_count(out_pdf) <= max_pages:
             break
         if not trim_once(data):
             break
         render(data, template, out_pdf)
+
+    # pass 2 — grow to fill: add a trimmed bullet back wherever it still fits
+    for _ in range(200):
+        candidates = []
+        for seq, pool, cap in ((data["experience"], pool_e, caps_e),
+                               (data["projects"], pool_p, caps_p)):
+            for it in seq:
+                full = pool.get(it.get("id") or it.get("name"), [])
+                if len(it["bullets"]) < min(cap, len(full)):
+                    candidates.append((it, full))
+        added = False
+        for it, full in candidates:
+            nxt = next((t for t in full if t not in it["bullets"]), None)
+            if nxt is None:
+                continue
+            it["bullets"].append(nxt)
+            render(data, template, out_pdf)
+            if page_count(out_pdf) <= max_pages:
+                added = True
+                break
+            it["bullets"].pop()  # doesn't fit here; try the next candidate
+        if not added:
+            break
+    render(data, template, out_pdf)  # ensure the file matches final state
 
 
 def build_one(master, preset, length, template):

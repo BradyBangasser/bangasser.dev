@@ -60,13 +60,13 @@
       "file": "/resumes/resume-sre-full-designed.pdf",
       "data": "/resumes/data/sre-full-designed.json",
       "template": "designed",
-      "pages": 2
+      "pages": 3
     },
     "sre-full-ats": {
       "file": "/resumes/resume-sre-full-ats.pdf",
       "data": "/resumes/data/sre-full-ats.json",
       "template": "ats",
-      "pages": 2
+      "pages": 3
     },
     "cloud-onepage-designed": {
       "file": "/resumes/resume-cloud-onepage-designed.pdf",

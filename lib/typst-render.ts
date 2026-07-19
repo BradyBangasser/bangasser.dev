@@ -55,10 +55,7 @@ export async function compileResume(
   const $typst = await getTypst();
   const dataText = await fetch(dataUrl).then((r) => r.text());
   await $typst.addSource("/build/data.json", dataText);
-  const pdf = await $typst.pdf({
-    mainFilePath: TEMPLATE_FILE[template],
-    inputs: { data: "/build/data.json" },
-  });
+  const pdf = await $typst.pdf({ mainFilePath: TEMPLATE_FILE[template] });
   const blob = new Blob([pdf as BlobPart], { type: "application/pdf" });
   return URL.createObjectURL(blob);
 }
