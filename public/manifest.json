@@ -1,0 +1,156 @@
+{
+  "presets": {
+    "sre": {
+      "label": "Site Reliability / Platform",
+      "headline": "Site Reliability & Platform Engineer"
+    },
+    "cloud": {
+      "label": "Cloud / Security",
+      "headline": "Cloud & Security Engineer"
+    },
+    "hpc": {
+      "label": "HPC / Systems",
+      "headline": "HPC & Systems Engineer"
+    },
+    "compilers": {
+      "label": "Compilers / Low-level",
+      "headline": "Compiler & Systems Engineer"
+    },
+    "software": {
+      "label": "General Software",
+      "headline": "Software Engineer"
+    }
+  },
+  "lengths": [
+    "onepage",
+    "twopage",
+    "full"
+  ],
+  "templates": [
+    "designed",
+    "ats"
+  ],
+  "default": "sre-onepage-designed",
+  "files": {
+    "sre-onepage-designed": {
+      "file": "/resumes/resume-sre-onepage-designed.pdf",
+      "pages": 1
+    },
+    "sre-onepage-ats": {
+      "file": "/resumes/resume-sre-onepage-ats.pdf",
+      "pages": 1
+    },
+    "sre-twopage-designed": {
+      "file": "/resumes/resume-sre-twopage-designed.pdf",
+      "pages": 2
+    },
+    "sre-twopage-ats": {
+      "file": "/resumes/resume-sre-twopage-ats.pdf",
+      "pages": 2
+    },
+    "sre-full-designed": {
+      "file": "/resumes/resume-sre-full-designed.pdf",
+      "pages": 2
+    },
+    "sre-full-ats": {
+      "file": "/resumes/resume-sre-full-ats.pdf",
+      "pages": 2
+    },
+    "cloud-onepage-designed": {
+      "file": "/resumes/resume-cloud-onepage-designed.pdf",
+      "pages": 1
+    },
+    "cloud-onepage-ats": {
+      "file": "/resumes/resume-cloud-onepage-ats.pdf",
+      "pages": 1
+    },
+    "cloud-twopage-designed": {
+      "file": "/resumes/resume-cloud-twopage-designed.pdf",
+      "pages": 2
+    },
+    "cloud-twopage-ats": {
+      "file": "/resumes/resume-cloud-twopage-ats.pdf",
+      "pages": 2
+    },
+    "cloud-full-designed": {
+      "file": "/resumes/resume-cloud-full-designed.pdf",
+      "pages": 2
+    },
+    "cloud-full-ats": {
+      "file": "/resumes/resume-cloud-full-ats.pdf",
+      "pages": 2
+    },
+    "hpc-onepage-designed": {
+      "file": "/resumes/resume-hpc-onepage-designed.pdf",
+      "pages": 1
+    },
+    "hpc-onepage-ats": {
+      "file": "/resumes/resume-hpc-onepage-ats.pdf",
+      "pages": 1
+    },
+    "hpc-twopage-designed": {
+      "file": "/resumes/resume-hpc-twopage-designed.pdf",
+      "pages": 1
+    },
+    "hpc-twopage-ats": {
+      "file": "/resumes/resume-hpc-twopage-ats.pdf",
+      "pages": 2
+    },
+    "hpc-full-designed": {
+      "file": "/resumes/resume-hpc-full-designed.pdf",
+      "pages": 2
+    },
+    "hpc-full-ats": {
+      "file": "/resumes/resume-hpc-full-ats.pdf",
+      "pages": 2
+    },
+    "compilers-onepage-designed": {
+      "file": "/resumes/resume-compilers-onepage-designed.pdf",
+      "pages": 1
+    },
+    "compilers-onepage-ats": {
+      "file": "/resumes/resume-compilers-onepage-ats.pdf",
+      "pages": 1
+    },
+    "compilers-twopage-designed": {
+      "file": "/resumes/resume-compilers-twopage-designed.pdf",
+      "pages": 1
+    },
+    "compilers-twopage-ats": {
+      "file": "/resumes/resume-compilers-twopage-ats.pdf",
+      "pages": 1
+    },
+    "compilers-full-designed": {
+      "file": "/resumes/resume-compilers-full-designed.pdf",
+      "pages": 2
+    },
+    "compilers-full-ats": {
+      "file": "/resumes/resume-compilers-full-ats.pdf",
+      "pages": 2
+    },
+    "software-onepage-designed": {
+      "file": "/resumes/resume-software-onepage-designed.pdf",
+      "pages": 1
+    },
+    "software-onepage-ats": {
+      "file": "/resumes/resume-software-onepage-ats.pdf",
+      "pages": 1
+    },
+    "software-twopage-designed": {
+      "file": "/resumes/resume-software-twopage-designed.pdf",
+      "pages": 2
+    },
+    "software-twopage-ats": {
+      "file": "/resumes/resume-software-twopage-ats.pdf",
+      "pages": 2
+    },
+    "software-full-designed": {
+      "file": "/resumes/resume-software-full-designed.pdf",
+      "pages": 2
+    },
+    "software-full-ats": {
+      "file": "/resumes/resume-software-full-ats.pdf",
+      "pages": 2
+    }
+  }
+}
