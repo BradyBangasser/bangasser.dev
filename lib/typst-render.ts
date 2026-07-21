@@ -1,61 +1,91 @@
-// In-browser PDF compilation with typst.ts. Loaded lazily from a CDN so it
-// never touches the server bundle. Mirrors the local build's virtual FS
-// (/templates/*.typ, /templates/icons/*.svg, /build/data.json) so a variant
-// compiles to the exact same PDF the prebuilt step produced.
+// In-browser PDF compilation with typst.ts.
 //
-// If anything here fails (offline, CDN blocked, font gap), callers fall back
-// to the prebuilt static PDF, so the page always works.
+// Uses the ALL-IN-ONE **full** bundle, which ships the wasm compiler *and* the
+// default fonts (Libertinus Serif included). The lite bundle omits fonts, which
+// is why an earlier version failed to compile. Loaded from CDN via a module
+// <script> that sets a global `$typst`.
+//
+// The document is compiled from the modular template (path-based json()/image(),
+// compatible across typst versions) plus the per-variant data and icon files
+// added to the compiler's virtual filesystem.
 
-let ready: Promise<any> | null = null;
-
-const CDN = "https://cdn.jsdelivr.net/npm";
-const SNIPPET = `${CDN}/@myriaddreamin/typst.ts/dist/esm/contrib/snippet.mjs`;
-const COMPILER = `${CDN}/@myriaddreamin/typst-ts-web-compiler/pkg/typst_ts_web_compiler_bg.wasm`;
-const RENDERER = `${CDN}/@myriaddreamin/typst-ts-renderer/pkg/typst_ts_renderer_bg.wasm`;
-
-async function getTypst() {
-  if (!ready) {
-    ready = (async () => {
-      const mod = await import(/* webpackIgnore: true */ /* @vite-ignore */ SNIPPET);
-      const $typst = mod.$typst;
-      $typst.setCompilerInitOptions({ getModule: () => COMPILER });
-      $typst.setRendererInitOptions({ getModule: () => RENDERER });
-      // preload the shared assets once
-      const files: Record<string, string> = {
-        "/templates/resume.typ": "/typst/resume.typ",
-        "/templates/resume-ats.typ": "/typst/resume-ats.typ",
-        "/templates/icons/github.svg": "/typst/icons/github.svg",
-        "/templates/icons/linkedin.svg": "/typst/icons/linkedin.svg",
-      };
-      await Promise.all(
-        Object.entries(files).map(async ([vpath, url]) => {
-          const txt = await fetch(url).then((r) => r.text());
-          await $typst.addSource(vpath, txt);
-        }),
-      );
-      return $typst;
-    })().catch((e) => {
-      ready = null; // allow retry
-      throw e;
-    });
-  }
-  return ready;
+declare global {
+  interface Window { $typst?: any }
 }
 
-const TEMPLATE_FILE: Record<string, string> = {
-  designed: "/templates/resume.typ",
-  ats: "/templates/resume-ats.typ",
+const BUNDLE =
+  "https://cdn.jsdelivr.net/npm/@myriaddreamin/typst-all-in-one.ts@0.7.0/dist/esm/index.js";
+
+const TEMPLATE_URL: Record<string, string> = {
+  designed: "/typst/resume.typ",
+  ats: "/typst/resume-ats.typ",
 };
 
-// Compile a variant to a blob URL. `dataUrl` is manifest.files[key].data.
+let loader: Promise<any> | null = null;
+
+function loadTypst(): Promise<any> {
+  if (typeof window === "undefined") return Promise.reject(new Error("no window"));
+  if (window.$typst) return Promise.resolve(window.$typst);
+  if (!loader) {
+    loader = new Promise<any>((resolve, reject) => {
+      const waitForGlobal = () => {
+        const start = Date.now();
+        const iv = setInterval(() => {
+          if (window.$typst) { clearInterval(iv); resolve(window.$typst); }
+          else if (Date.now() - start > 20000) { clearInterval(iv); reject(new Error("typst global not set")); }
+        }, 40);
+      };
+      const existing = document.getElementById("typst-bundle") as HTMLScriptElement | null;
+      if (existing) { waitForGlobal(); return; }
+      const s = document.createElement("script");
+      s.type = "module";
+      s.id = "typst-bundle";
+      s.src = BUNDLE;
+      s.addEventListener("load", waitForGlobal);
+      s.addEventListener("error", () => reject(new Error("failed to load typst bundle")));
+      document.head.appendChild(s);
+    }).catch((e) => { loader = null; throw e; });
+  }
+  return loader;
+}
+
+// icons only need to be added once; they're referenced by absolute path
+let iconsReady: Promise<void> | null = null;
+function ensureIcons($typst: any): Promise<void> {
+  if (!iconsReady) {
+    const icons: Record<string, string> = {
+      "/templates/icons/github.svg": "/typst/icons/github.svg",
+      "/templates/icons/linkedin.svg": "/typst/icons/linkedin.svg",
+    };
+    iconsReady = Promise.all(
+      Object.entries(icons).map(async ([vpath, url]) => {
+        const ab = (await fetch(url).then((r) => r.arrayBuffer())) as ArrayBuffer;
+        $typst.mapShadow(vpath, new Uint8Array(ab));
+      }),
+    ).then(() => {}).catch((e) => { iconsReady = null; throw e; });
+  }
+  return iconsReady;
+}
+
+// serialize compiles — the shared $typst instance isn't safe for concurrent use
+let lock: Promise<unknown> = Promise.resolve();
+
 export async function compileResume(
   dataUrl: string,
   template: "designed" | "ats",
 ): Promise<string> {
-  const $typst = await getTypst();
-  const dataText = await fetch(dataUrl).then((r) => r.text());
-  await $typst.addSource("/build/data.json", dataText);
-  const pdf = await $typst.pdf({ mainFilePath: TEMPLATE_FILE[template] });
-  const blob = new Blob([pdf as BlobPart], { type: "application/pdf" });
-  return URL.createObjectURL(blob);
+  const run = async (): Promise<string> => {
+    const $typst = await loadTypst();
+    await ensureIcons($typst);
+    const [tpl, data] = await Promise.all([
+      fetch(TEMPLATE_URL[template]).then((r) => r.text()),
+      fetch(dataUrl).then((r) => r.text()),
+    ]);
+    await $typst.addSource("/build/data.json", data);
+    const pdf = await $typst.pdf({ mainContent: tpl });
+    return URL.createObjectURL(new Blob([pdf as BlobPart], { type: "application/pdf" }));
+  };
+  const result = lock.then(run, run);
+  lock = result.then(() => {}, () => {});
+  return result;
 }
