@@ -16,7 +16,7 @@
 
 #set document(title: m.name + " Resume", author: m.name)
 #set page(paper: "us-letter", margin: (x: 0.65in, top: 0.5in, bottom: 0.5in))
-#set text(font: "New Computer Modern Sans", size: 10.5pt, fill: ink)
+#set text(font: "Libertinus Serif", size: 10.5pt, fill: ink)
 #set par(leading: 0.55em, justify: false)   // ~1.13 line spacing
 
 // ---- rhythm ---------------------------------------------------------------
@@ -54,9 +54,12 @@
   line(length: 100%, stroke: 0.7pt + accent)
   v(SEC_BELOW)
 }
-#let iconlink(path, label) = box(baseline: 0pt)[
-  #box(image(path, height: 8.5pt), baseline: 1.6pt)#h(2.5pt)#label
+#let iconlink(icon, label) = box(baseline: 0pt)[
+  #box(icon, baseline: 1.6pt)#h(2.5pt)#label
 ]
+// Icon images (kept as named vars so the downloadable .typ can inline them).
+#let __gh = image("/templates/icons/github.svg", height: 8.5pt)
+#let __li = image("/templates/icons/linkedin.svg", height: 8.5pt)
 
 // ---- centered header -------------------------------------------------------
 #align(center)[
@@ -70,9 +73,9 @@
     if m.phone != "" { items.push([#m.phone]) }
     if m.links.website != "" { items.push([#m.links.website]) }
     let gh = m.links.at("github_handle", default: "")
-    if gh != "" { items.push(iconlink("/templates/icons/github.svg", gh)) }
+    if gh != "" { items.push(iconlink(__gh, gh)) }
     let li = m.links.at("linkedin_handle", default: "")
-    if li != "" { items.push(iconlink("/templates/icons/linkedin.svg", li)) }
+    if li != "" { items.push(iconlink(__li, li)) }
     if m.location != "" { items.push([#m.location]) }
     items.join(sep)
   }

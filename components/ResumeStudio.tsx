@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { compileResume } from "@/lib/typst-render";
 
-type Variant = { file: string; data: string; template: string; pages: number };
+type Variant = { file: string; data: string; typ: string; template: string; pages: number };
 type Manifest = {
   presets: Record<string, { label: string; headline: string }>;
   lengths: string[];
@@ -119,6 +119,12 @@ export function ResumeStudio({ manifest }: { manifest: Manifest }) {
               className="rounded-lg border border-border px-5 py-2.5 text-sm font-medium text-ink no-underline transition-colors hover:border-accent/50 hover:text-accent">
               Open in new tab
             </a>
+            {current?.typ && (
+              <a href={current.typ} download={`${fileName.replace(/\.pdf$/, "")}.typ`}
+                className="rounded-lg border border-border px-5 py-2.5 text-sm font-medium text-ink no-underline transition-colors hover:border-accent/50 hover:text-accent">
+                Download .typ
+              </a>
+            )}
             {current && (
               <span className="font-mono text-xs text-ink-faint">
                 {current.pages} page{current.pages > 1 ? "s" : ""}

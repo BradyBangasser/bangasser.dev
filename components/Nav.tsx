@@ -56,7 +56,7 @@ export function Nav() {
           })}
         </nav>
 
-        {/* mobile hamburger */}
+        {/* mobile hamburger — three bars that morph into an X */}
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
@@ -65,51 +65,45 @@ export function Nav() {
           aria-controls="mobile-menu"
           className="inline-flex items-center justify-center rounded-md p-2 text-ink-muted hover:bg-bg-elevated hover:text-ink md:hidden"
         >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
-            {open ? (
-              <>
-                <line x1="6" y1="6" x2="18" y2="18" />
-                <line x1="6" y1="18" x2="18" y2="6" />
-              </>
-            ) : (
-              <>
-                <line x1="3" y1="6" x2="21" y2="6" />
-                <line x1="3" y1="12" x2="21" y2="12" />
-                <line x1="3" y1="18" x2="21" y2="18" />
-              </>
-            )}
-          </svg>
+          <span className="relative block h-4 w-6" aria-hidden="true">
+            <span className={`absolute left-0 block h-0.5 w-6 rounded-full bg-current transition-all duration-300 ease-in-out ${open ? "top-1/2 -translate-y-1/2 rotate-45" : "top-0"}`} />
+            <span className={`absolute left-0 top-1/2 block h-0.5 w-6 -translate-y-1/2 rounded-full bg-current transition-all duration-200 ease-in-out ${open ? "opacity-0" : "opacity-100"}`} />
+            <span className={`absolute left-0 block h-0.5 w-6 rounded-full bg-current transition-all duration-300 ease-in-out ${open ? "bottom-1/2 translate-y-1/2 -rotate-45" : "bottom-0"}`} />
+          </span>
         </button>
       </div>
 
-      {/* mobile dropdown panel */}
-      {open && (
-        <nav
-          id="mobile-menu"
-          aria-label="Primary"
-          className="border-t border-border-subtle bg-bg/95 backdrop-blur-md md:hidden"
-        >
-          <ul className="mx-auto max-w-page px-4 py-2">
-            {links.map((link) => {
-              const active = pathname === link.href;
-              return (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    onClick={() => setOpen(false)}
-                    aria-current={active ? "page" : undefined}
-                    className={`block rounded-md px-3 py-3 font-mono text-sm uppercase tracking-wide no-underline transition-colors hover:bg-bg-elevated ${
-                      active ? "text-accent" : "text-ink-muted hover:text-ink"
-                    }`}
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </nav>
-      )}
+      {/* mobile dropdown panel — slides open, always mounted so it can animate */}
+      <nav
+        id="mobile-menu"
+        aria-label="Primary"
+        aria-hidden={!open}
+        className={`overflow-hidden bg-bg/95 backdrop-blur-md transition-all duration-300 ease-in-out md:hidden ${
+          open ? "max-h-96 border-t border-border-subtle opacity-100" : "pointer-events-none max-h-0 opacity-0"
+        }`}
+      >
+        <ul className="mx-auto max-w-page px-4 py-2">
+          {links.map((link, i) => {
+            const active = pathname === link.href;
+            return (
+              <li key={link.href}>
+                <Link
+                  href={link.href}
+                  onClick={() => setOpen(false)}
+                  tabIndex={open ? 0 : -1}
+                  aria-current={active ? "page" : undefined}
+                  style={{ transitionDelay: open ? `${i * 30}ms` : "0ms" }}
+                  className={`block translate-y-0 rounded-md px-3 py-3 font-mono text-sm uppercase tracking-wide no-underline transition-all duration-300 hover:bg-bg-elevated ${
+                    open ? "translate-y-0 opacity-100" : "-translate-y-1 opacity-0"
+                  } ${active ? "text-accent" : "text-ink-muted hover:text-ink"}`}
+                >
+                  {link.label}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
     </header>
   );
 }

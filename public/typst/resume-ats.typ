@@ -10,7 +10,7 @@
 
 #set document(title: m.name + " Resume", author: m.name)
 #set page(paper: "us-letter", margin: (x: 0.7in, top: 0.55in, bottom: 0.55in))
-#set text(font: "New Computer Modern Sans", size: 10.5pt, fill: ink)
+#set text(font: "Libertinus Serif", size: 10.5pt, fill: ink)
 #set par(leading: 0.55em, justify: false)
 
 #let SEC_ABOVE = 12pt
