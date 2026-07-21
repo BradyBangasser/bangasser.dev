@@ -31,3 +31,6 @@ resume/build/
 resume/out/
 __pycache__/
 *.pyc
+
+# resume PDFs are compiled in the browser, never committed
+public/resumes/*.pdf

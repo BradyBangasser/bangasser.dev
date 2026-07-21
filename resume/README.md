@@ -29,7 +29,7 @@ dropped whole before it would be trimmed below two).
 ## Regenerate
 ```bash
 pip install typst pyyaml pymupdf     # once
-npm run resumes                       # -> lib/resume-data.json + public/resumes/*.pdf
+npm run resumes                       # -> data + self-contained .typ (compiled in the browser)
 # or a single variant:
 python resume/build.py --preset sre --length onepage --template designed
 ```

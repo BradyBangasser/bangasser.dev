@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { compileResume } from "@/lib/typst-render";
 
-type Variant = { file: string; data: string; typ: string; template: string; pages: number };
+type Variant = { data: string; typ: string; template: string; pages: number };
 type Manifest = {
   presets: Record<string, { label: string; headline: string }>;
   lengths: string[];
@@ -46,9 +46,10 @@ export function ResumeStudio({ manifest }: { manifest: Manifest }) {
     [manifest, preset, length, template],
   );
 
-  // in-browser compilation, with the prebuilt PDF as the always-available fallback
+  // Everything is compiled in the browser from Typst — no PDFs are shipped.
   const [compiledUrl, setCompiledUrl] = useState<string | null>(null);
-  const [status, setStatus] = useState<"idle" | "compiling" | "browser" | "prebuilt">("idle");
+  const [status, setStatus] = useState<"compiling" | "ready" | "error">("compiling");
+  const [attempt, setAttempt] = useState(0);
   const lastBlob = useRef<string | null>(null);
 
   const setBlob = useCallback((url: string | null) => {
@@ -63,15 +64,15 @@ export function ResumeStudio({ manifest }: { manifest: Manifest }) {
     setBlob(null);
     setStatus("compiling");
     compileResume(current.data, template as "designed" | "ats")
-      .then((url) => { if (alive) { setBlob(url); setStatus("browser"); } })
-      .catch(() => { if (alive) setStatus("prebuilt"); });
+      .then((url) => { if (alive) { setBlob(url); setStatus("ready"); } })
+      .catch(() => { if (alive) setStatus("error"); });
     return () => { alive = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [current, template]);
+  }, [current, template, attempt]);
 
   useEffect(() => () => { if (lastBlob.current) URL.revokeObjectURL(lastBlob.current); }, []);
 
-  const viewUrl = compiledUrl ?? current?.file;
+  const viewUrl = compiledUrl;
   const fileName = `brady-bangasser-${preset}-${length}-${template}.pdf`;
 
   // auth + AI
@@ -111,26 +112,40 @@ export function ResumeStudio({ manifest }: { manifest: Manifest }) {
       <div className="mt-10 grid gap-10 lg:grid-cols-[1fr_1.1fr] lg:items-start">
         <div className="space-y-6">
           <div className="flex flex-wrap items-center gap-3">
-            <a href={viewUrl} download={fileName}
-              className="rounded-lg bg-accent px-5 py-2.5 text-sm font-medium text-bg no-underline transition-opacity hover:opacity-90">
-              Download PDF
-            </a>
-            <a href={viewUrl} target="_blank" rel="noreferrer"
-              className="rounded-lg border border-border px-5 py-2.5 text-sm font-medium text-ink no-underline transition-colors hover:border-accent/50 hover:text-accent">
-              Open in new tab
-            </a>
+            {viewUrl ? (
+              <a href={viewUrl} download={fileName}
+                className="rounded-lg bg-accent px-5 py-2.5 text-sm font-medium text-bg no-underline transition-opacity hover:opacity-90">
+                Download PDF
+              </a>
+            ) : (
+              <span className="cursor-default rounded-lg bg-accent/40 px-5 py-2.5 text-sm font-medium text-bg">
+                {status === "error" ? "Compile failed" : "Compiling…"}
+              </span>
+            )}
+            {viewUrl && (
+              <a href={viewUrl} target="_blank" rel="noreferrer"
+                className="rounded-lg border border-border px-5 py-2.5 text-sm font-medium text-ink no-underline transition-colors hover:border-accent/50 hover:text-accent">
+                Open in new tab
+              </a>
+            )}
             {current?.typ && (
               <a href={current.typ} download={`${fileName.replace(/\.pdf$/, "")}.typ`}
                 className="rounded-lg border border-border px-5 py-2.5 text-sm font-medium text-ink no-underline transition-colors hover:border-accent/50 hover:text-accent">
                 Download .typ
               </a>
             )}
+            {status === "error" && (
+              <button onClick={() => setAttempt((a) => a + 1)}
+                className="rounded-lg border border-accent/50 px-4 py-2 text-sm font-medium text-accent transition-colors hover:bg-accent/10">
+                Retry
+              </button>
+            )}
             {current && (
               <span className="font-mono text-xs text-ink-faint">
                 {current.pages} page{current.pages > 1 ? "s" : ""}
-                {status === "compiling" && " · compiling…"}
-                {status === "browser" && " · compiled in your browser"}
-                {status === "prebuilt" && " · prebuilt"}
+                {status === "compiling" && " · compiling in your browser…"}
+                {status === "ready" && " · compiled in your browser"}
+                {status === "error" && " · compile failed"}
               </span>
             )}
           </div>
@@ -168,15 +183,23 @@ export function ResumeStudio({ manifest }: { manifest: Manifest }) {
         </div>
 
         <div className="lg:sticky lg:top-24">
-          <div className="overflow-hidden rounded-xl border border-border bg-bg-elevated">
+          <div className="flex min-h-[78vh] items-center justify-center overflow-hidden rounded-xl border border-border bg-bg-elevated">
             {viewUrl ? (
               <object data={`${viewUrl}#toolbar=0`} type="application/pdf" className="h-[78vh] w-full">
                 <div className="p-6 text-sm text-ink-muted">
                   Preview unavailable here. <a href={viewUrl} className="text-accent">Open the PDF</a>.
                 </div>
               </object>
+            ) : status === "error" ? (
+              <div className="p-6 text-center text-sm text-ink-muted">
+                Couldn&apos;t compile the resume in your browser.{" "}
+                <button onClick={() => setAttempt((a) => a + 1)} className="text-accent underline">Retry</button>
+              </div>
             ) : (
-              <div className="p-6 text-sm text-ink-muted">No resume for that combination.</div>
+              <div className="flex flex-col items-center gap-3 p-6 text-sm text-ink-muted">
+                <span className="h-6 w-6 animate-spin rounded-full border-2 border-border border-t-accent" aria-hidden="true" />
+                Compiling in your browser…
+              </div>
             )}
           </div>
         </div>

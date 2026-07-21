@@ -4,15 +4,16 @@ Export step for the website. Run from `resume/`:
 
     python export.py     (or: npm run resumes)
 
-Produces:
+Produces (Typst only — no PDFs are committed; the browser compiles them):
   ../lib/resume-data.json           full master (About page + /resume UI)
-  ../public/manifest.json           index of prebuilt variants + page counts
-  ../public/resumes/*.pdf           every field x length x template, prebuilt
+  ../public/manifest.json           index of variants + page counts
   ../public/resumes/data/*.json     final (fitted) render data per variant
+  ../public/resumes/typ/*.typ       self-contained Typst per variant (compile/download)
   ../public/typst/*                 templates + icons for in-browser compile
 
-Prebuilt PDFs are the instant, no-JS fallback. The per-variant data JSON plus
-the templates let the browser recompile the exact same PDF with typst.ts.
+PDFs are rendered only as throwaway intermediates so the fitter can count pages;
+they are written to resume/build/ (gitignored) and never shipped. The browser
+compiles the real PDF on demand with typst.ts.
 """
 from __future__ import annotations
 import json, shutil
@@ -27,6 +28,7 @@ PUBLIC = SITE / "public"
 RESUMES = PUBLIC / "resumes"
 DATADIR = RESUMES / "data"
 TYPST = PUBLIC / "typst"
+TMP = ROOT / "build"  # gitignored scratch for fit rendering
 
 
 def export_data(master: dict):
@@ -79,7 +81,9 @@ def standalone_typ(template_src: str, data_json: str, gh_svg: str, li_svg: str) 
 def prebuild(master: dict):
     for d in (DATADIR, TYPDIR):
         d.mkdir(parents=True, exist_ok=True)
-    for f in list(RESUMES.glob("*.pdf")) + list(DATADIR.glob("*.json")) + list(TYPDIR.glob("*.typ")):
+    TMP.mkdir(parents=True, exist_ok=True)
+    # clear any previously generated outputs, including stale committed PDFs
+    for f in list(DATADIR.glob("*.json")) + list(TYPDIR.glob("*.typ")) + list(RESUMES.glob("*.pdf")):
         f.unlink()
 
     tpl_src = {t: (ROOT / "templates" / build.TEMPLATE_FILES[t]).read_text()
@@ -98,22 +102,22 @@ def prebuild(master: dict):
         for length in build.LENGTHS:
             for template in build.TEMPLATE_FILES:
                 data = build.build_data(master, preset, length)
-                out = RESUMES / f"resume-{preset}-{length}-{template}.pdf"
-                build.render_fit(data, template, out, build.TARGET_PAGES[length])
+                # render to a throwaway PDF purely so the fitter can count pages
+                tmp_pdf = TMP / "fit.pdf"
+                build.render_fit(data, template, tmp_pdf, build.TARGET_PAGES[length])
                 key = f"{preset}-{length}-{template}"
                 data_json = json.dumps(data, ensure_ascii=False)
                 (DATADIR / f"{key}.json").write_text(data_json)
                 (TYPDIR / f"{key}.typ").write_text(
                     standalone_typ(tpl_src[template], data_json, gh_svg, li_svg))
                 manifest["files"][key] = {
-                    "file": f"/resumes/{out.name}",
                     "data": f"/resumes/data/{key}.json",
                     "typ": f"/resumes/typ/{key}.typ",
                     "template": template,
-                    "pages": build.page_count(out),
+                    "pages": build.page_count(tmp_pdf),
                 }
     (PUBLIC / "manifest.json").write_text(json.dumps(manifest, indent=2))
-    print(f"prebuilt {len(manifest['files'])} PDFs + data + typ into {RESUMES.relative_to(SITE)}")
+    print(f"wrote {len(manifest['files'])} variants (data + typ, no PDFs) into {RESUMES.relative_to(SITE)}")
 
 
 def main():

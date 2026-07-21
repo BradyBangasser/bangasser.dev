@@ -76,7 +76,7 @@ export async function POST(req: Request) {
 
   return NextResponse.json({
     preset, length, template,
-    file: entry.file, pages: entry.pages,
+    typ: entry.typ, data: entry.data, pages: entry.pages,
     rationale: String(choice?.rationale ?? "").slice(0, 400),
     remaining: limit.remaining,
     owner,
