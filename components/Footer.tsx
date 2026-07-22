@@ -18,7 +18,7 @@ export function Footer() {
     <footer className="border-t border-border-subtle">
       <div className="mx-auto flex max-w-page flex-col gap-4 px-6 py-10 sm:flex-row sm:items-center sm:justify-between">
         <p className="font-mono text-xs text-ink-faint">
-          © {year} {siteConfig.name}. Built with Next.js.
+          © {year} {siteConfig.name}.
         </p>
         <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
           <a
