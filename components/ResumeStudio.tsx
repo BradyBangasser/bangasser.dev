@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { compileResume } from "@/lib/typst-render";
 import {
   keywordTailor, webllmTailor, loadEngine, hasWebGPU, MODEL_SIZE,
+  type TailorProgress,
 } from "@/lib/tailor";
 
 type Variant = { data: string; typ: string; template: string; pages: number };
@@ -86,6 +87,8 @@ export function ResumeStudio({ manifest }: { manifest: Manifest }) {
   const [aiMsg, setAiMsg] = useState<string | null>(null);
   const [modelState, setModelState] = useState<"off" | "loading" | "ready" | "error">("off");
   const [progress, setProgress] = useState(0);
+  const [loadText, setLoadText] = useState("");
+  const [infer, setInfer] = useState<TailorProgress | null>(null);
   const engineRef = useRef<unknown>(null);
 
   useEffect(() => {
@@ -98,11 +101,17 @@ export function ResumeStudio({ manifest }: { manifest: Manifest }) {
   async function enableModel() {
     setModelState("loading");
     setProgress(0);
+    setLoadText("Starting...");
     try {
-      engineRef.current = await loadEngine((fraction) => setProgress(fraction));
+      engineRef.current = await loadEngine((fraction, text) => {
+        setProgress(fraction);
+        if (text) setLoadText(text);
+      });
       setModelState("ready");
-    } catch {
+      setLoadText("");
+    } catch (e) {
       setModelState("error");
+      setLoadText((e as Error)?.message ?? "unknown error");
     }
   }
 
@@ -110,18 +119,25 @@ export function ResumeStudio({ manifest }: { manifest: Manifest }) {
     if (jd.trim().length < 30) return;
     setAiBusy(true);
     setAiMsg(null);
+    setInfer(null);
     try {
-      const result = useModel && engineRef.current
-        ? await webllmTailor(jd, manifest, engineRef.current)
-        : keywordTailor(jd, manifest);
-      setPreset(result.preset);
-      setLength(result.length);
-      setTemplate(result.template);
-      setAiMsg(result.rationale);
-    } catch {
-      setAiMsg("Couldn't match the posting — try again.");
+      if (useModel && engineRef.current) {
+        const result = await webllmTailor(jd, manifest, engineRef.current, setInfer);
+        setPreset(result.preset); setLength(result.length); setTemplate(result.template);
+        setAiMsg(result.rationale);
+      } else {
+        const result = keywordTailor(jd, manifest);
+        setPreset(result.preset); setLength(result.length); setTemplate(result.template);
+        setAiMsg(result.rationale);
+      }
+    } catch (e) {
+      // The model genuinely failed: say so plainly instead of pretending it ran.
+      const fb = keywordTailor(jd, manifest);
+      setPreset(fb.preset); setLength(fb.length); setTemplate(fb.template);
+      setAiMsg(`In-browser model failed (${(e as Error)?.message ?? "unknown error"}). Used keyword matching instead.`);
     } finally {
       setAiBusy(false);
+      setInfer(null);
     }
   }
 
@@ -222,23 +238,48 @@ export function ResumeStudio({ manifest }: { manifest: Manifest }) {
                   ) : modelState === "loading" ? (
                     <div className="mt-3">
                       <div className="mb-1 flex justify-between font-mono text-xs text-ink-faint">
-                        <span>Downloading model…</span><span>{Math.round(progress * 100)}%</span>
+                        <span>Downloading model...</span><span>{Math.round(progress * 100)}%</span>
                       </div>
                       <div className="h-1.5 w-full overflow-hidden rounded-full bg-border">
                         <div className="h-full bg-accent transition-all duration-300" style={{ width: `${Math.round(progress * 100)}%` }} />
                       </div>
+                      {loadText && <p className="mt-2 truncate font-mono text-xs text-ink-faint">{loadText}</p>}
                     </div>
                   ) : modelState === "ready" ? (
-                    <div className="mt-3 flex flex-wrap items-center gap-3">
-                      <button onClick={() => runTailor(true)} disabled={aiBusy || jd.trim().length < 30}
-                        className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-bg transition-opacity hover:opacity-90 disabled:opacity-40">
-                        {aiBusy ? "Matching…" : "Find my best-fit resume"}
-                      </button>
-                      <span className="font-mono text-xs text-ink-faint">in-browser model ready</span>
+                    <div className="mt-3 space-y-3">
+                      <div className="flex flex-wrap items-center gap-3">
+                        <button onClick={() => runTailor(true)} disabled={aiBusy || jd.trim().length < 30}
+                          className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-bg transition-opacity hover:opacity-90 disabled:opacity-40">
+                          {aiBusy ? "Thinking..." : "Find my best-fit resume"}
+                        </button>
+                        <span className="font-mono text-xs text-ink-faint">in-browser model ready</span>
+                      </div>
+                      {aiBusy && (
+                        <div>
+                          <div className="mb-1 flex justify-between font-mono text-xs text-ink-faint">
+                            <span>
+                              {infer?.phase === "generating"
+                                ? `Generating (${infer.tokens} tokens)`
+                                : "Reading the posting..."}
+                            </span>
+                            <span>
+                              {infer ? `${(infer.elapsedMs / 1000).toFixed(1)}s` : "0.0s"}
+                            </span>
+                          </div>
+                          <div className="h-1.5 w-full overflow-hidden rounded-full bg-border">
+                            {infer?.phase === "generating" ? (
+                              <div className="h-full bg-accent transition-all duration-200"
+                                style={{ width: `${Math.round(infer.fraction * 100)}%` }} />
+                            ) : (
+                              <div className="h-full w-1/3 animate-pulse rounded-full bg-accent" />
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <p className="mt-3 text-sm text-ink-muted">
-                      Couldn&apos;t load the in-browser model.{" "}
+                      Couldn&apos;t load the in-browser model{loadText ? `: ${loadText}` : "."}{" "}
                       <button onClick={enableModel} className="text-accent underline">retry</button>{" "}or{" "}
                       <button onClick={() => runTailor(false)} className="text-accent underline">use keyword matching</button>.
                     </p>

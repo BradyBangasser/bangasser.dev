@@ -78,52 +78,123 @@ export function hasWebGPU(): boolean {
   return typeof navigator !== "undefined" && "gpu" in navigator;
 }
 
-export const MODEL_ID = "Llama-3.2-1B-Instruct-q4f16_1-MLC";
+// Primary uses f16 weights (smaller, faster) but needs the WebGPU "shader-f16"
+// feature; the f32 build is the compatibility fallback for GPUs without it.
+export const MODEL_CANDIDATES = [
+  "Llama-3.2-1B-Instruct-q4f16_1-MLC",
+  "Llama-3.2-1B-Instruct-q4f32_1-MLC",
+];
+export const MODEL_ID = MODEL_CANDIDATES[0];
 export const MODEL_SIZE = "~0.9 GB";
 const WEBLLM_CDN = "https://esm.run/@mlc-ai/web-llm@0.2.84";
+
+const MAX_TOKENS = 80;
+const INFERENCE_TIMEOUT_MS = 120_000;
+
+// Progress of a single tailoring run (not the download).
+export type TailorProgress = {
+  phase: "prefill" | "generating";
+  fraction: number; // 0..1; stays 0 while prefilling
+  tokens: number;
+  elapsedMs: number;
+};
 
 let enginePromise: Promise<unknown> | null = null;
 
 // Downloads + initializes the in-browser model. Call ONLY after auth + consent.
-export function loadEngine(onProgress: (fraction: number, text: string) => void): Promise<unknown> {
+// Tries each candidate in turn so a GPU without f16 support still works.
+export function loadEngine(
+  onProgress: (fraction: number, text: string) => void,
+): Promise<unknown> {
   if (!enginePromise) {
     enginePromise = (async () => {
       // hidden from the bundler so the CDN module is fetched at runtime only
       // eslint-disable-next-line no-new-func
       const importCDN = new Function("u", "return import(u)") as (u: string) => Promise<any>;
       const webllm = await importCDN(WEBLLM_CDN);
-      return webllm.CreateMLCEngine(MODEL_ID, {
-        initProgressCallback: (r: { progress?: number; text?: string }) =>
-          onProgress(r.progress ?? 0, r.text ?? ""),
-      });
+      let lastErr: unknown;
+      for (const model of MODEL_CANDIDATES) {
+        try {
+          return await webllm.CreateMLCEngine(model, {
+            initProgressCallback: (r: { progress?: number; text?: string }) =>
+              onProgress(r.progress ?? 0, r.text ?? ""),
+          });
+        } catch (e) {
+          lastErr = e;
+          onProgress(0, "Trying a more compatible build...");
+        }
+      }
+      throw lastErr ?? new Error("could not initialize the in-browser model");
     })().catch((e) => { enginePromise = null; throw e; });
   }
   return enginePromise;
 }
 
-export async function webllmTailor(jd: string, manifest: Manifest, engine: any): Promise<TailorResult> {
+export async function webllmTailor(
+  jd: string,
+  manifest: Manifest,
+  engine: any,
+  onProgress?: (p: TailorProgress) => void,
+): Promise<TailorResult> {
   const presetLines = Object.entries(manifest.presets)
     .map(([id, p]) => `${id}: ${p.label} — ${p.headline}`).join("\n");
   const system =
     "You match a job description to the best-fitting resume preset. " +
     'Reply with ONLY a compact JSON object like {"preset":"<id>","length":"onepage|twopage","template":"designed|ats"}. ' +
     "Choose the preset whose focus best matches the role. No prose.";
-  const user = `Presets:\n${presetLines}\n\nJob description:\n${jd.slice(0, 3000)}`;
-  try {
-    const resp = await engine.chat.completions.create({
-      messages: [{ role: "system", content: system }, { role: "user", content: user }],
-      temperature: 0.2, max_tokens: 96,
-    });
-    const text: string = resp?.choices?.[0]?.message?.content ?? "";
-    const match = text.match(/\{[\s\S]*\}/);
-    const obj = match ? JSON.parse(match[0]) : {};
-    const fallback = keywordTailor(jd, manifest);
-    const preset = Object.keys(manifest.presets).includes(obj.preset) ? obj.preset : fallback.preset;
-    const length = manifest.lengths.includes(obj.length) ? obj.length : fallback.length;
-    const template = manifest.templates.includes(obj.template) ? obj.template : fallback.template;
-    const label = manifest.presets[preset]?.label ?? preset;
-    return { preset, length, template, rationale: `Matched to your ${label} resume (in-browser model).`, via: "webllm" };
-  } catch {
-    return keywordTailor(jd, manifest);
+  const user = `Presets:\n${presetLines}\n\nJob description:\n${jd.slice(0, 2000)}`;
+
+  const started = Date.now();
+  let text = "";
+  let tokens = 0;
+  onProgress?.({ phase: "prefill", fraction: 0, tokens: 0, elapsedMs: 0 });
+
+  // A hard failure here is surfaced to the caller rather than silently
+  // swallowed, so a broken model never masquerades as a keyword match.
+  const stream = await engine.chat.completions.create({
+    messages: [{ role: "system", content: system }, { role: "user", content: user }],
+    temperature: 0.2,
+    max_tokens: MAX_TOKENS,
+    stream: true,
+  });
+  for await (const chunk of stream) {
+    const delta = chunk?.choices?.[0]?.delta?.content ?? "";
+    if (delta) {
+      text += delta;
+      tokens += 1;
+      onProgress?.({
+        phase: "generating",
+        fraction: Math.min(tokens / MAX_TOKENS, 0.99),
+        tokens,
+        elapsedMs: Date.now() - started,
+      });
+    }
+    if (Date.now() - started > INFERENCE_TIMEOUT_MS) {
+      try { await engine.interruptGenerate?.(); } catch { /* ignore */ }
+      break;
+    }
   }
+
+  // Soft failure: model ran but produced nothing usable, so fall back openly.
+  const fallback = keywordTailor(jd, manifest);
+  const match = text.match(/\{[\s\S]*\}/);
+  if (!match) {
+    return { ...fallback, rationale: `${fallback.rationale} (the in-browser model gave no usable answer)` };
+  }
+  let obj: Record<string, unknown> = {};
+  try { obj = JSON.parse(match[0]); } catch { /* keep empty */ }
+
+  const preset = Object.keys(manifest.presets).includes(obj.preset as string)
+    ? (obj.preset as string) : fallback.preset;
+  const length = manifest.lengths.includes(obj.length as string)
+    ? (obj.length as string) : fallback.length;
+  const template = manifest.templates.includes(obj.template as string)
+    ? (obj.template as string) : fallback.template;
+  const label = manifest.presets[preset]?.label ?? preset;
+  const secs = ((Date.now() - started) / 1000).toFixed(1);
+  return {
+    preset, length, template,
+    rationale: `Matched to your ${label} resume (in-browser model, ${secs}s).`,
+    via: "webllm",
+  };
 }
