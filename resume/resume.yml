@@ -107,6 +107,62 @@ education:
 # Each bullet: text + tags (which presets) + priority (1 = keep on one-pagers).
 # -----------------------------------------------------------------------------
 experience:
+  - id: ibm-phyp
+    title: "Firmware Engineer Intern"
+    org: "IBM"
+    location: "Rochester, MN"
+    start: "2026-05"
+    end: "2026-08"
+    tags: [sre, software, compilers]
+    bullets:
+      # pipeline modernization + build-time win (same topic, per-target wording)
+      - text: "Modernized Jenkins/Groovy CI/CD pipelines for firmware and software builds on IBM's Power Hypervisor (PHYP), cutting build time 17% with smart Git prefetching and by eliminating redundant double-fetching."
+        tags: [sre]
+        priority: 1
+      - text: "Re-engineered PHYP firmware and software build pipelines (Jenkins, Groovy, Python, Perl, Bash), improving build time 17% through smart Git prefetching and de-duplicated fetches."
+        tags: [software]
+        priority: 1
+      # AI failure analysis
+      - text: "Added an AI failure-analysis step to a custom build harness that root-causes failed builds from logs with an IBM internal model, then reports next steps, whether a rerun is safe, likely hardware or network causes, and who to contact, speeding incident triage."
+        tags: [sre]
+        priority: 1
+      - text: "Extended a custom build harness with AI failure analysis: it parses build logs, calls an IBM internal model to root-cause failures, and emits a report with next steps, rerun-safety, and escalation contacts."
+        tags: [software]
+        priority: 1
+      # observability + reports
+      - text: "Added pipeline observability and auto-generated Markdown and PDF build-failure reports so engineers could triage broken builds faster."
+        tags: [sre]
+        priority: 2
+      - text: "Built Markdown and PDF build-failure report generation and richer build observability into the pipeline tooling."
+        tags: [software]
+        priority: 2
+      # scale / extendibility
+      - text: "Shipped the pipeline to 3 teams and designed it to be extendible across the entire PHYP development department."
+        tags: [sre, software]
+        priority: 2
+      # secure build systems / Artifactory
+      - text: "Integrated pipelines with secure enterprise build and artifact systems including Artifactory, working within locked-down build and deployment constraints."
+        tags: [sre]
+        priority: 3
+      # POWER hardware validation harness
+      - text: "Adapted the hardware build-validation harness to the new pipeline and AI analysis, running validation directly on POWER9, POWER10, and POWER11 systems."
+        tags: [sre]
+        priority: 3
+      - text: "Modified the hardware build-validation harness to work with the new pipeline and AI failure analysis across POWER9/10/11 systems, collaborating with interns, engineers, and hardware teams."
+        tags: [software]
+        priority: 3
+      # compiler modernization
+      - text: "Contributed to compiler-modernization planning for the department, advocating for LLVM/Clang and reasoning through migration trade-offs and risks."
+        tags: [compilers]
+        priority: 1
+      - text: "Helped shape compiler-modernization direction, pushing for LLVM/Clang and working through the migration trade-offs."
+        tags: [software]
+        priority: 3
+      # legacy code / hypervisor / exposure
+      - text: "Worked across large legacy codebases and hypervisor architecture, and gained exposure to IBM Quantum and Cloud."
+        tags: [compilers, software]
+        priority: 2
+
   - id: isu-sysadmin
     title: "System Administrator"
     org: "Iowa State University"
@@ -450,6 +506,8 @@ skills:
       - { name: "Fortran", tags: [hpc] }
       - { name: "SQL", tags: [software, cloud] }
       - { name: "Lua", tags: [compilers] }
+      - { name: "Perl", tags: [sre, software] }
+      - { name: "Groovy", tags: [sre, software] }
   - group: "Infrastructure & Platform"
     tags: [sre, cloud, hpc, software]
     items:
@@ -464,6 +522,8 @@ skills:
       - { name: "Linux/Unix", tags: [all] }
       - { name: "Git", tags: [all] }
       - { name: "CI/CD", tags: [sre, cloud, software] }
+      - { name: "Jenkins", tags: [sre, software] }
+      - { name: "Artifactory", tags: [sre, software, cloud] }
   - group: "Cloud"
     tags: [cloud, sre, software]
     items:
