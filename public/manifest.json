@@ -19,6 +19,10 @@
     "software": {
       "label": "General Software",
       "headline": "Software Engineer"
+    },
+    "sales": {
+      "label": "Sales / Solutions",
+      "headline": "Technical Sales & Solutions Engineer"
     }
   },
   "lengths": [
@@ -48,25 +52,25 @@
       "data": "/resumes/data/sre-twopage-designed.json",
       "typ": "/resumes/typ/sre-twopage-designed.typ",
       "template": "designed",
-      "pages": 2
+      "pages": 1
     },
     "sre-twopage-ats": {
       "data": "/resumes/data/sre-twopage-ats.json",
       "typ": "/resumes/typ/sre-twopage-ats.typ",
       "template": "ats",
-      "pages": 2
+      "pages": 1
     },
     "sre-full-designed": {
       "data": "/resumes/data/sre-full-designed.json",
       "typ": "/resumes/typ/sre-full-designed.typ",
       "template": "designed",
-      "pages": 3
+      "pages": 1
     },
     "sre-full-ats": {
       "data": "/resumes/data/sre-full-ats.json",
       "typ": "/resumes/typ/sre-full-ats.typ",
       "template": "ats",
-      "pages": 3
+      "pages": 1
     },
     "cloud-onepage-designed": {
       "data": "/resumes/data/cloud-onepage-designed.json",
@@ -84,25 +88,25 @@
       "data": "/resumes/data/cloud-twopage-designed.json",
       "typ": "/resumes/typ/cloud-twopage-designed.typ",
       "template": "designed",
-      "pages": 2
+      "pages": 1
     },
     "cloud-twopage-ats": {
       "data": "/resumes/data/cloud-twopage-ats.json",
       "typ": "/resumes/typ/cloud-twopage-ats.typ",
       "template": "ats",
-      "pages": 2
+      "pages": 1
     },
     "cloud-full-designed": {
       "data": "/resumes/data/cloud-full-designed.json",
       "typ": "/resumes/typ/cloud-full-designed.typ",
       "template": "designed",
-      "pages": 2
+      "pages": 1
     },
     "cloud-full-ats": {
       "data": "/resumes/data/cloud-full-ats.json",
       "typ": "/resumes/typ/cloud-full-ats.typ",
       "template": "ats",
-      "pages": 2
+      "pages": 1
     },
     "hpc-onepage-designed": {
       "data": "/resumes/data/hpc-onepage-designed.json",
@@ -120,25 +124,25 @@
       "data": "/resumes/data/hpc-twopage-designed.json",
       "typ": "/resumes/typ/hpc-twopage-designed.typ",
       "template": "designed",
-      "pages": 2
+      "pages": 1
     },
     "hpc-twopage-ats": {
       "data": "/resumes/data/hpc-twopage-ats.json",
       "typ": "/resumes/typ/hpc-twopage-ats.typ",
       "template": "ats",
-      "pages": 2
+      "pages": 1
     },
     "hpc-full-designed": {
       "data": "/resumes/data/hpc-full-designed.json",
       "typ": "/resumes/typ/hpc-full-designed.typ",
       "template": "designed",
-      "pages": 2
+      "pages": 1
     },
     "hpc-full-ats": {
       "data": "/resumes/data/hpc-full-ats.json",
       "typ": "/resumes/typ/hpc-full-ats.typ",
       "template": "ats",
-      "pages": 2
+      "pages": 1
     },
     "compilers-onepage-designed": {
       "data": "/resumes/data/compilers-onepage-designed.json",
@@ -156,25 +160,25 @@
       "data": "/resumes/data/compilers-twopage-designed.json",
       "typ": "/resumes/typ/compilers-twopage-designed.typ",
       "template": "designed",
-      "pages": 2
+      "pages": 1
     },
     "compilers-twopage-ats": {
       "data": "/resumes/data/compilers-twopage-ats.json",
       "typ": "/resumes/typ/compilers-twopage-ats.typ",
       "template": "ats",
-      "pages": 2
+      "pages": 1
     },
     "compilers-full-designed": {
       "data": "/resumes/data/compilers-full-designed.json",
       "typ": "/resumes/typ/compilers-full-designed.typ",
       "template": "designed",
-      "pages": 2
+      "pages": 1
     },
     "compilers-full-ats": {
       "data": "/resumes/data/compilers-full-ats.json",
       "typ": "/resumes/typ/compilers-full-ats.typ",
       "template": "ats",
-      "pages": 2
+      "pages": 1
     },
     "software-onepage-designed": {
       "data": "/resumes/data/software-onepage-designed.json",
@@ -192,25 +196,61 @@
       "data": "/resumes/data/software-twopage-designed.json",
       "typ": "/resumes/typ/software-twopage-designed.typ",
       "template": "designed",
-      "pages": 2
+      "pages": 1
     },
     "software-twopage-ats": {
       "data": "/resumes/data/software-twopage-ats.json",
       "typ": "/resumes/typ/software-twopage-ats.typ",
       "template": "ats",
-      "pages": 2
+      "pages": 1
     },
     "software-full-designed": {
       "data": "/resumes/data/software-full-designed.json",
       "typ": "/resumes/typ/software-full-designed.typ",
       "template": "designed",
-      "pages": 3
+      "pages": 1
     },
     "software-full-ats": {
       "data": "/resumes/data/software-full-ats.json",
       "typ": "/resumes/typ/software-full-ats.typ",
       "template": "ats",
-      "pages": 3
+      "pages": 1
+    },
+    "sales-onepage-designed": {
+      "data": "/resumes/data/sales-onepage-designed.json",
+      "typ": "/resumes/typ/sales-onepage-designed.typ",
+      "template": "designed",
+      "pages": 1
+    },
+    "sales-onepage-ats": {
+      "data": "/resumes/data/sales-onepage-ats.json",
+      "typ": "/resumes/typ/sales-onepage-ats.typ",
+      "template": "ats",
+      "pages": 1
+    },
+    "sales-twopage-designed": {
+      "data": "/resumes/data/sales-twopage-designed.json",
+      "typ": "/resumes/typ/sales-twopage-designed.typ",
+      "template": "designed",
+      "pages": 1
+    },
+    "sales-twopage-ats": {
+      "data": "/resumes/data/sales-twopage-ats.json",
+      "typ": "/resumes/typ/sales-twopage-ats.typ",
+      "template": "ats",
+      "pages": 1
+    },
+    "sales-full-designed": {
+      "data": "/resumes/data/sales-full-designed.json",
+      "typ": "/resumes/typ/sales-full-designed.typ",
+      "template": "designed",
+      "pages": 1
+    },
+    "sales-full-ats": {
+      "data": "/resumes/data/sales-full-ats.json",
+      "typ": "/resumes/typ/sales-full-ats.typ",
+      "template": "ats",
+      "pages": 1
     }
   }
 }
