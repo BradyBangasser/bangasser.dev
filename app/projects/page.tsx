@@ -2,12 +2,11 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import { TagFilter } from "@/components/TagFilter";
 import { ProjectCard } from "@/components/ProjectCard";
-import { RepoCard } from "@/components/RepoCard";
-import { getAllProjects, getAllProjectTags, getGeneratedRepos } from "@/lib/content";
+import { getAllProjects, getAllProjectTags } from "@/lib/content";
 
 export const metadata: Metadata = {
   title: "Projects",
-  description: "HPC, cloud infrastructure, cryptography, and compiler projects.",
+  description: "HPC, cloud infrastructure, cryptography, and compiler projects, pulled live from GitHub.",
 };
 
 export default async function ProjectsPage({
@@ -24,20 +23,16 @@ export default async function ProjectsPage({
     ? allProjects.filter((p) => p.tags?.includes(activeTag))
     : allProjects;
 
-  const curatedRepoNames = new Set(
-    allProjects.map((p) => p.repo).filter(Boolean) as string[]
-  );
-  const repos = getGeneratedRepos().filter(
-    (r) => !curatedRepoNames.has(r.fullName)
-  );
+  const activeCount = allProjects.filter((p) => p.active).length;
 
   return (
     <div className="mx-auto max-w-page px-6 py-14 sm:py-20">
       <p className="eyebrow mb-4">// projects</p>
       <h1 className="text-3xl font-semibold sm:text-4xl">Projects</h1>
       <p className="mt-3 max-w-prose text-ink-muted">
-        Write-ups on systems I&apos;ve built or broken. Add a new one by dropping
-        an .mdx file into <code className="font-mono text-accent-soft">/content/projects</code>.
+        Every repo, pulled live from GitHub at build time
+        {activeCount > 0 ? ` — ${activeCount} active right now` : ""}. A README is
+        the project&apos;s overview; a curated write-up, when present, adds narration.
       </p>
 
       {tags.length > 0 && (
@@ -56,19 +51,8 @@ export default async function ProjectsPage({
         </div>
       ) : (
         <p className="mt-8 text-sm text-ink-faint">
-          No write-ups yet{activeTag ? ` tagged "${activeTag}"` : ""}.
+          No projects found{activeTag ? ` tagged "${activeTag}"` : ""}.
         </p>
-      )}
-
-      {repos.length > 0 && (
-        <div className="mt-16">
-          <p className="eyebrow mb-6">// more on github</p>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {repos.map((repo) => (
-              <RepoCard key={repo.fullName} repo={repo} />
-            ))}
-          </div>
-        </div>
       )}
     </div>
   );

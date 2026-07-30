@@ -1,13 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { compileResume } from "@/lib/typst-render";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   keywordTailor, webllmTailor, loadEngine, hasWebGPU, MODEL_SIZE,
   type TailorProgress,
 } from "@/lib/tailor";
 
-type Variant = { data: string; typ: string; template: string; pages: number };
+type Variant = { file: string; typ: string; template: string; pages: number };
 type Manifest = {
   presets: Record<string, { label: string; headline: string }>;
   lengths: string[];
@@ -49,35 +48,8 @@ export function ResumeStudio({ manifest }: { manifest: Manifest }) {
     () => manifest.files[`${preset}-${length}-${template}`],
     [manifest, preset, length, template],
   );
-
-  // Everything is compiled in the browser from Typst — no PDFs are shipped.
-  const [compiledUrl, setCompiledUrl] = useState<string | null>(null);
-  const [status, setStatus] = useState<"compiling" | "ready" | "error">("compiling");
-  const [attempt, setAttempt] = useState(0);
-  const lastBlob = useRef<string | null>(null);
-
-  const setBlob = useCallback((url: string | null) => {
-    if (lastBlob.current) URL.revokeObjectURL(lastBlob.current);
-    lastBlob.current = url;
-    setCompiledUrl(url);
-  }, []);
-
-  useEffect(() => {
-    if (!current) return;
-    let alive = true;
-    setBlob(null);
-    setStatus("compiling");
-    compileResume(current.data, template as "designed" | "ats")
-      .then((url) => { if (alive) { setBlob(url); setStatus("ready"); } })
-      .catch(() => { if (alive) setStatus("error"); });
-    return () => { alive = false; };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [current, template, attempt]);
-
-  useEffect(() => () => { if (lastBlob.current) URL.revokeObjectURL(lastBlob.current); }, []);
-
-  const viewUrl = compiledUrl;
-  const fileName = `brady-bangasser-${preset}-${length}-${template}.pdf`;
+  const viewUrl = current?.file;
+  const baseName = `brady-bangasser-${preset}-${length}-${template}`;
 
   // auth + client-side tailoring (no server, no API cost)
   const [me, setMe] = useState<{ login: string | null }>({ login: null });
@@ -96,49 +68,28 @@ export function ResumeStudio({ manifest }: { manifest: Manifest }) {
     setWebgpu(hasWebGPU());
   }, []);
 
-  // Download + start the in-browser model. Only reachable once signed in and
-  // after the visitor explicitly clicks to consent (the model is ~0.9 GB).
   async function enableModel() {
-    setModelState("loading");
-    setProgress(0);
-    setLoadText("Starting...");
+    setModelState("loading"); setProgress(0); setLoadText("Starting...");
     try {
-      engineRef.current = await loadEngine((fraction, text) => {
-        setProgress(fraction);
-        if (text) setLoadText(text);
-      });
-      setModelState("ready");
-      setLoadText("");
-    } catch (e) {
-      setModelState("error");
-      setLoadText((e as Error)?.message ?? "unknown error");
-    }
+      engineRef.current = await loadEngine((f, t) => { setProgress(f); if (t) setLoadText(t); });
+      setModelState("ready"); setLoadText("");
+    } catch (e) { setModelState("error"); setLoadText((e as Error)?.message ?? "unknown error"); }
   }
 
   async function runTailor(useModel: boolean) {
     if (jd.trim().length < 30) return;
-    setAiBusy(true);
-    setAiMsg(null);
-    setInfer(null);
+    setAiBusy(true); setAiMsg(null); setInfer(null);
     try {
-      if (useModel && engineRef.current) {
-        const result = await webllmTailor(jd, manifest, engineRef.current, setInfer);
-        setPreset(result.preset); setLength(result.length); setTemplate(result.template);
-        setAiMsg(result.rationale);
-      } else {
-        const result = keywordTailor(jd, manifest);
-        setPreset(result.preset); setLength(result.length); setTemplate(result.template);
-        setAiMsg(result.rationale);
-      }
+      const result = useModel && engineRef.current
+        ? await webllmTailor(jd, manifest, engineRef.current, setInfer)
+        : keywordTailor(jd, manifest);
+      setPreset(result.preset); setLength(result.length); setTemplate(result.template);
+      setAiMsg(result.rationale);
     } catch (e) {
-      // The model genuinely failed: say so plainly instead of pretending it ran.
       const fb = keywordTailor(jd, manifest);
       setPreset(fb.preset); setLength(fb.length); setTemplate(fb.template);
       setAiMsg(`In-browser model failed (${(e as Error)?.message ?? "unknown error"}). Used keyword matching instead.`);
-    } finally {
-      setAiBusy(false);
-      setInfer(null);
-    }
+    } finally { setAiBusy(false); setInfer(null); }
   }
 
   return (
@@ -147,21 +98,17 @@ export function ResumeStudio({ manifest }: { manifest: Manifest }) {
       <h1 className="text-3xl font-semibold sm:text-4xl">Resume</h1>
       <p className="mt-4 max-w-prose text-ink-muted">
         The default is tuned for reliability and platform roles. Switch the field,
-        length, or style and the PDF recompiles in your browser.
+        length, or style to get a version built for that target.
       </p>
 
       <div className="mt-10 grid gap-10 lg:grid-cols-[1fr_1.1fr] lg:items-start">
         <div className="space-y-6">
           <div className="flex flex-wrap items-center gap-3">
-            {viewUrl ? (
-              <a href={viewUrl} download={fileName}
+            {viewUrl && (
+              <a href={viewUrl} download={`${baseName}.pdf`}
                 className="rounded-lg bg-accent px-5 py-2.5 text-sm font-medium text-bg no-underline transition-opacity hover:opacity-90">
                 Download PDF
               </a>
-            ) : (
-              <span className="cursor-default rounded-lg bg-accent/40 px-5 py-2.5 text-sm font-medium text-bg">
-                {status === "error" ? "Compile failed" : "Compiling…"}
-              </span>
             )}
             {viewUrl && (
               <a href={viewUrl} target="_blank" rel="noreferrer"
@@ -170,23 +117,14 @@ export function ResumeStudio({ manifest }: { manifest: Manifest }) {
               </a>
             )}
             {current?.typ && (
-              <a href={current.typ} download={`${fileName.replace(/\.pdf$/, "")}.typ`}
+              <a href={current.typ} download={`${baseName}.typ`}
                 className="rounded-lg border border-border px-5 py-2.5 text-sm font-medium text-ink no-underline transition-colors hover:border-accent/50 hover:text-accent">
                 Download .typ
               </a>
             )}
-            {status === "error" && (
-              <button onClick={() => setAttempt((a) => a + 1)}
-                className="rounded-lg border border-accent/50 px-4 py-2 text-sm font-medium text-accent transition-colors hover:bg-accent/10">
-                Retry
-              </button>
-            )}
             {current && (
               <span className="font-mono text-xs text-ink-faint">
                 {current.pages} page{current.pages > 1 ? "s" : ""}
-                {status === "compiling" && " · compiling in your browser…"}
-                {status === "ready" && " · compiled in your browser"}
-                {status === "error" && " · compile failed"}
               </span>
             )}
           </div>
@@ -206,7 +144,6 @@ export function ResumeStudio({ manifest }: { manifest: Manifest }) {
             <p className="mb-3 text-sm text-ink-muted">
               Paste a posting and get pointed to the best-fit version. Runs entirely in your browser.
             </p>
-
             {!me.login ? (
               <p className="text-sm text-ink-muted">
                 <a href="/api/auth/github" className="text-accent">Sign in with GitHub</a> to use tailoring.
@@ -216,7 +153,6 @@ export function ResumeStudio({ manifest }: { manifest: Manifest }) {
                 <textarea value={jd} onChange={(e) => setJd(e.target.value)} rows={4}
                   placeholder="Paste the job description..."
                   className="w-full resize-y rounded-lg border border-border bg-bg-elevated px-3 py-2 text-sm text-ink outline-none focus:border-accent/60" />
-
                 {webgpu ? (
                   modelState === "off" ? (
                     <div className="mt-3 rounded-lg border border-border-subtle bg-bg-elevated px-4 py-3">
@@ -257,22 +193,13 @@ export function ResumeStudio({ manifest }: { manifest: Manifest }) {
                       {aiBusy && (
                         <div>
                           <div className="mb-1 flex justify-between font-mono text-xs text-ink-faint">
-                            <span>
-                              {infer?.phase === "generating"
-                                ? `Generating (${infer.tokens} tokens)`
-                                : "Reading the posting..."}
-                            </span>
-                            <span>
-                              {infer ? `${(infer.elapsedMs / 1000).toFixed(1)}s` : "0.0s"}
-                            </span>
+                            <span>{infer?.phase === "generating" ? `Generating (${infer.tokens} tokens)` : "Reading the posting..."}</span>
+                            <span>{infer ? `${(infer.elapsedMs / 1000).toFixed(1)}s` : "0.0s"}</span>
                           </div>
                           <div className="h-1.5 w-full overflow-hidden rounded-full bg-border">
                             {infer?.phase === "generating" ? (
-                              <div className="h-full bg-accent transition-all duration-200"
-                                style={{ width: `${Math.round(infer.fraction * 100)}%` }} />
-                            ) : (
-                              <div className="h-full w-1/3 animate-pulse rounded-full bg-accent" />
-                            )}
+                              <div className="h-full bg-accent transition-all duration-200" style={{ width: `${Math.round(infer.fraction * 100)}%` }} />
+                            ) : (<div className="h-full w-1/3 animate-pulse rounded-full bg-accent" />)}
                           </div>
                         </div>
                       )}
@@ -293,7 +220,6 @@ export function ResumeStudio({ manifest }: { manifest: Manifest }) {
                     <span className="font-mono text-xs text-ink-faint">keyword match (WebGPU not available)</span>
                   </div>
                 )}
-
                 {aiMsg && <p className="mt-3 text-sm text-ink-muted">{aiMsg}</p>}
               </>
             )}
@@ -308,16 +234,8 @@ export function ResumeStudio({ manifest }: { manifest: Manifest }) {
                   Preview unavailable here. <a href={viewUrl} className="text-accent">Open the PDF</a>.
                 </div>
               </object>
-            ) : status === "error" ? (
-              <div className="p-6 text-center text-sm text-ink-muted">
-                Couldn&apos;t compile the resume in your browser.{" "}
-                <button onClick={() => setAttempt((a) => a + 1)} className="text-accent underline">Retry</button>
-              </div>
             ) : (
-              <div className="flex flex-col items-center gap-3 p-6 text-sm text-ink-muted">
-                <span className="h-6 w-6 animate-spin rounded-full border-2 border-border border-t-accent" aria-hidden="true" />
-                Compiling in your browser…
-              </div>
+              <div className="p-6 text-sm text-ink-muted">No resume for that combination.</div>
             )}
           </div>
         </div>

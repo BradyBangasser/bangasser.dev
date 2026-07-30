@@ -43,6 +43,18 @@ export interface ProjectFrontmatter {
 export interface Project extends ProjectFrontmatter {
   slug: string;
   content: string;
+  // repo-derived (auto-discovery)
+  url?: string;
+  language?: string | null;
+  stars?: number;
+  openIssues?: number;
+  active?: boolean;
+  hasDocs?: boolean;
+  hasBlog?: boolean;
+  hasResumeYml?: boolean;
+  related?: string[];
+  external?: boolean;
+  pushedAt?: string;
 }
 
 function readAllSlugs(dir: string): string[] {
@@ -104,41 +116,8 @@ export function getAllTags(posts: Post[]): string[] {
 // Projects
 // ---------------------------------------------------------------------------
 
-export function getAllProjects(): Project[] {
-  const slugs = readAllSlugs(PROJECTS_DIR);
-  const projects = slugs.map((slug) => {
-    const { data, content } = readOne<ProjectFrontmatter>(PROJECTS_DIR, slug);
-    return { slug, ...data, content };
-  });
-  return projects
-    .filter((p) => includeDrafts || !p.draft)
-    .sort((a, b) => (a.date < b.date ? 1 : -1));
-}
-
-export function getProjectBySlug(slug: string): Project | null {
-  try {
-    const { data, content } = readOne<ProjectFrontmatter>(PROJECTS_DIR, slug);
-    return { slug, ...data, content };
-  } catch {
-    return null;
-  }
-}
-
-export function getAllProjectTags(projects: Project[]): string[] {
-  const tags = new Set<string>();
-  projects.forEach((p) => p.tags?.forEach((t) => tags.add(t)));
-  return Array.from(tags).sort();
-}
-
-// ---------------------------------------------------------------------------
-// GitHub-scanned repos (generated at build time — see scripts/fetch-github.ts)
-// These are separate from curated /content/projects write-ups. A curated
-// project can reference a repo via `repo: "owner/name"` to pull in live
-// stars/language/description; repos with no curated write-up still show up
-// as lightweight auto-generated cards.
-// ---------------------------------------------------------------------------
-
-export interface GeneratedRepo {
+export interface GeneratedProject {
+  slug: string;
   name: string;
   fullName: string;
   description: string | null;
@@ -146,19 +125,87 @@ export interface GeneratedRepo {
   homepage: string | null;
   language: string | null;
   stars: number;
+  openIssues: number;
   topics: string[];
-  updatedAt: string;
-  archived: boolean;
-  fork: boolean;
+  pushedAt: string;
+  active: boolean;
+  defaultBranch: string;
+  hasDocs: boolean;
+  hasBlog: boolean;
+  hasResumeYml: boolean;
+  related: string[];
+  readme: string | null;
+  external: boolean;
 }
 
-export function getGeneratedRepos(): GeneratedRepo[] {
+export function getGeneratedProjects(): GeneratedProject[] {
   const file = path.join(CONTENT_DIR, "projects", "_generated.json");
   if (!fs.existsSync(file)) return [];
   try {
-    const raw = JSON.parse(fs.readFileSync(file, "utf8"));
-    return raw.repos ?? [];
+    return (JSON.parse(fs.readFileSync(file, "utf8")).projects ?? []) as GeneratedProject[];
   } catch {
     return [];
   }
+}
+
+// Projects are auto-discovered from repos (opt-out). A curated
+// content/projects/{slug}.md, if present, overrides frontmatter fields and
+// supplies narration; otherwise the README is the project's main content.
+function mergeProject(g: GeneratedProject): Project {
+  let fm: Partial<ProjectFrontmatter> = {};
+  let narration = "";
+  try {
+    if (
+      fs.existsSync(path.join(PROJECTS_DIR, `${g.slug}.md`)) ||
+      fs.existsSync(path.join(PROJECTS_DIR, `${g.slug}.mdx`))
+    ) {
+      const { data, content } = readOne<ProjectFrontmatter>(PROJECTS_DIR, g.slug);
+      fm = data;
+      narration = content;
+    }
+  } catch {
+    /* no curated file */
+  }
+  return {
+    slug: g.slug,
+    title: fm.title ?? g.name,
+    summary: fm.summary ?? g.description ?? "",
+    tags: fm.tags ?? g.topics ?? [],
+    status: fm.status ?? (g.active ? "active" : "archived"),
+    date: g.pushedAt,
+    repo: g.fullName,
+    externalUrl: fm.externalUrl ?? g.homepage ?? undefined,
+    featured: fm.featured,
+    draft: fm.draft,
+    content: narration || g.readme || "",
+    url: g.url,
+    language: g.language,
+    stars: g.stars,
+    openIssues: g.openIssues,
+    active: g.active,
+    hasDocs: g.hasDocs,
+    hasBlog: g.hasBlog,
+    hasResumeYml: g.hasResumeYml,
+    related: g.related,
+    external: g.external,
+    pushedAt: g.pushedAt,
+  };
+}
+
+export function getAllProjects(): Project[] {
+  return getGeneratedProjects()
+    .map(mergeProject)
+    .filter((p) => includeDrafts || !p.draft)
+    .sort((a, b) => (a.date < b.date ? 1 : -1));
+}
+
+export function getProjectBySlug(slug: string): Project | null {
+  const g = getGeneratedProjects().find((p) => p.slug === slug);
+  return g ? mergeProject(g) : null;
+}
+
+export function getAllProjectTags(projects: Project[]): string[] {
+  const tags = new Set<string>();
+  projects.forEach((p) => p.tags?.forEach((t) => tags.add(t)));
+  return Array.from(tags).sort();
 }

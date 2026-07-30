@@ -151,7 +151,7 @@ experience:
         tags: [software]
         priority: 2
       # scale / extendibility
-      - text: "Shipped the pipeline to 3 teams and designed it to be extendible across the entire PHYP development department."
+      - text: "Shipped the pipeline to 3 teams and designed it to be extensible across the entire PHYP development department."
         tags: [sre, software]
         priority: 2
       # secure build systems / Artifactory
@@ -372,7 +372,7 @@ experience:
 # -----------------------------------------------------------------------------
 projects:
   - id: erid
-    name: "Erid - Unified Cloud Images"
+    name: "Erid: Unified Cloud Images"
     period: "2026"
     repo: "BradyBangasser/erid"
     tags: [cloud, sre, sales]
@@ -535,11 +535,14 @@ projects:
         priority: 3
 
   - id: fratrat
-    name: "FratRat — Encrypted Student Social App"
+    name: "FratRat: Encrypted Student Social App"
     period: "2026"
     tags: [software, cloud, sales]
     tech: [Swift, SwiftUI, Rust, gRPC, PostgreSQL, "AWS KMS"]
     bullets:
+      - text: "Marketed the app with a small team through social media campaigns and in-person, person-to-person selling, driving early student signups on campus."
+        tags: [sales]
+        priority: 1
       - text: "Built an end-to-end encrypted iOS social app (SwiftUI) for college students, with peer discovery, matching, group chat, and live party alerts."
         tags: [software]
         priority: 3
