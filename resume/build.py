@@ -30,8 +30,8 @@ TEMPLATE_FILES = {"designed": "resume.typ", "ats": "resume-ats.typ"}
 
 # How many items / bullets survive at each length. `full` = no caps.
 BUDGET = {
-    "onepage": {"experiences": 6, "projects": 6, "bullets": 4, "max_priority": 3},
-    "twopage": {"experiences": 9, "projects": 9, "bullets": 5, "max_priority": 4},
+    "onepage": {"experiences": 4, "projects": 3, "bullets": 3, "max_priority": 3},
+    "twopage": {"experiences": 8, "projects": 7, "bullets": 4, "max_priority": 4},
     "full":    {"experiences": 99, "projects": 99, "bullets": 99, "max_priority": 9},
 }
 # Target page count per length (None = no limit). Renders start generous and

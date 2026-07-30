@@ -13,10 +13,10 @@
 #set text(font: "Libertinus Serif", size: 10.5pt, fill: ink)
 #set par(leading: 0.55em, justify: false)
 
-#let SEC_ABOVE = 12pt
-#let SEC_BELOW = 6pt
-#let ENTRY_GAP = 10pt
-#let BULLET_ABOVE = 3.5pt
+#let SEC_ABOVE = 10pt
+#let SEC_BELOW = 5pt
+#let ENTRY_GAP = 8pt
+#let BULLET_ABOVE = 3pt
 
 #let point(it) = block(breakable: false, above: BULLET_ABOVE, below: 0pt)[
   #grid(columns: (0.85em, 1fr), column-gutter: 4pt, [•], [#it])
@@ -66,14 +66,14 @@
     for (i, p) in data.projects.enumerate() {
       if i > 0 { v(ENTRY_GAP) }
       entry(headrow(text(weight: 700, size: 10.5pt)[#p.name], p.period), p.bullets)
-      if p.tech.len() > 0 { block(breakable: false, above: 3pt)[#text(size: 9pt, fill: sub)[Tech: #p.tech.join(", ")]] }
+      if p.tech.len() > 0 { block(breakable: false, above: 2.5pt)[#text(size: 9pt, fill: sub)[Tech: #p.tech.join(", ")]] }
     }
   })
 }
 #if data.education.len() > 0 {
   section("Education", {
     for (i, e) in data.education.enumerate() {
-      if i > 0 { v(ENTRY_GAP - 2pt) }
+      if i > 0 { v(ENTRY_GAP) }
       let sb = ()
       if e.gpa != "" { sb.push("GPA: " + e.gpa) }
       if e.honors != "" { sb.push(e.honors) }
@@ -88,7 +88,7 @@
 #if data.skills.len() > 0 {
   section("Technical Skills", {
     for (i, g) in data.skills.enumerate() {
-      block(breakable: false, above: if i > 0 { 3pt } else { 0pt })[
+      block(breakable: false, above: if i > 0 { 2.5pt } else { 0pt })[
         #text(weight: 700, size: 10pt)[#g.group: ] #text(size: 10pt)[#g.items.join(", ")]
       ]
     }

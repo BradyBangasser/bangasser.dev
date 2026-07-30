@@ -34,3 +34,7 @@ __pycache__/
 
 # resume PDFs are compiled in the browser, never committed
 public/resumes/*.pdf
+public/resumes/
+lib/resume-data.json
+lib/resume-manifest.json
+public/typst/

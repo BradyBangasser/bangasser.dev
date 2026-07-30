@@ -20,10 +20,10 @@
 #set par(leading: 0.55em, justify: false)   // ~1.13 line spacing
 
 // ---- rhythm ---------------------------------------------------------------
-#let SEC_ABOVE = 12pt
-#let SEC_BELOW = 6pt
-#let ENTRY_GAP = 10pt
-#let BULLET_ABOVE = 3.5pt
+#let SEC_ABOVE = 10pt
+#let SEC_BELOW = 5pt
+#let ENTRY_GAP = 8pt
+#let BULLET_ABOVE = 3pt
 
 #let point(it) = block(breakable: false, above: BULLET_ABOVE, below: 0pt)[
   #grid(columns: (0.85em, 1fr), column-gutter: 4pt, text(fill: sub)[•], [#it])
@@ -102,7 +102,7 @@
     if i > 0 { v(ENTRY_GAP) }
     entry(colhead(p.name, "", "", p.period), p.bullets)
     if p.tech.len() > 0 {
-      block(breakable: false, above: 3pt)[
+      block(breakable: false, above: 2.5pt)[
         #text(size: 8.7pt, fill: sub)[#emph[Tech:] #p.tech.join(", ")]
       ]
     }
@@ -112,7 +112,7 @@
 #if data.education.len() > 0 {
   section("Education")
   for (i, e) in data.education.enumerate() {
-    if i > 0 { v(ENTRY_GAP - 2pt) }
+    if i > 0 { v(ENTRY_GAP) }
     let sb = ()
     if e.gpa != "" { sb.push("GPA: " + e.gpa) }
     if e.honors != "" { sb.push(e.honors) }
@@ -129,7 +129,7 @@
 #if data.skills.len() > 0 {
   section("Technical Skills")
   for (i, g) in data.skills.enumerate() {
-    block(breakable: false, above: if i > 0 { 3pt } else { 0pt })[
+    block(breakable: false, above: if i > 0 { 2.5pt } else { 0pt })[
       #grid(columns: (auto, 1fr), column-gutter: 6pt,
         text(weight: 700, size: 9.7pt)[#g.group:],
         text(size: 9.7pt)[#g.items.join(", ")])
