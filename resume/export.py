@@ -118,6 +118,29 @@ def prebuild(master: dict):
                 }
     (PUBLIC / "manifest.json").write_text(json.dumps(manifest, indent=2))
     print(f"wrote {len(manifest['files'])} variants (data + typ, no PDFs) into {RESUMES.relative_to(SITE)}")
+    check_lengths(manifest)
+
+
+# Desired page count per length. onepage/twopage are exact; full is open-ended.
+DESIRED = {"onepage": 1, "twopage": 2}
+
+
+def check_lengths(manifest: dict):
+    """Verify every generated variant is the intended length. onepage must be
+    exactly 1 page and twopage exactly 2; anything off is flagged loudly so a
+    content edit can't silently produce a wrong-length resume."""
+    problems = []
+    for key, info in manifest["files"].items():
+        length = key.split("-")[1]
+        want = DESIRED.get(length)
+        if want is not None and info["pages"] != want:
+            kind = "OVER" if info["pages"] > want else "UNDER"
+            problems.append(f"  {kind}: {key} is {info['pages']}p, want {want}p")
+    if problems:
+        print(f"WARNING: {len(problems)} variant(s) are not the desired length:")
+        print("\n".join(problems))
+    else:
+        print("length check: all onepage=1 and twopage=2 as intended.")
 
 
 def main():

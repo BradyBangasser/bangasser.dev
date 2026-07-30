@@ -40,6 +40,10 @@ const PRESET_KEYWORDS: Record<string, string[]> = {
   software: ["software engineer", "backend", "full stack", "full-stack", "api",
              "microservice", "golang", " go ", "rust", "typescript", "react",
              "database", "distributed", "web"],
+  sales: ["sales", "account", "customer", "client", "quota", "revenue",
+          "solutions engineer", "sales engineer", "pre-sales", "presales",
+          "business development", "stakeholder", "demo", "onboarding",
+          "relationship", "territory", "go-to-market", "technical sales"],
 };
 
 function scorePresets(jd: string): { id: string; score: number }[] {

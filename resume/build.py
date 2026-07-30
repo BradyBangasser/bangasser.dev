@@ -24,7 +24,7 @@ TEMPLATES = ROOT / "templates"
 BUILD = ROOT / "build"
 OUT = ROOT / "out"
 
-PRESETS = ["sre", "cloud", "hpc", "compilers", "software"]
+PRESETS = ["sre", "cloud", "hpc", "compilers", "software", "sales"]
 LENGTHS = ["onepage", "twopage", "full"]
 TEMPLATE_FILES = {"designed": "resume.typ", "ats": "resume-ats.typ"}
 
@@ -56,10 +56,10 @@ def date_range(start: str, end: str) -> str:
 
 
 def sort_key(entry: dict):
-    """Reverse-chronological: present first, then latest start."""
+    """Pinned entries first, then reverse-chronological (present, then latest)."""
     end = entry.get("end", "")
     end_rank = "9999-99" if end == "present" else end
-    return (end_rank, entry.get("start", ""))
+    return (entry.get("pin", 0), end_rank, entry.get("start", ""))
 
 
 def has_tag(tags, preset, length) -> bool:

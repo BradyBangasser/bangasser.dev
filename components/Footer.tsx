@@ -13,12 +13,30 @@ const socialLinks: { key: keyof typeof siteConfig.social; label: string }[] = [
 export function Footer() {
   const year = new Date().getFullYear();
   const activeSocials = socialLinks.filter((s) => siteConfig.social[s.key]);
+  const sha = process.env.NEXT_PUBLIC_COMMIT_SHA;
 
   return (
     <footer className="border-t border-border-subtle">
       <div className="mx-auto flex max-w-page flex-col gap-4 px-6 py-10 sm:flex-row sm:items-center sm:justify-between">
         <p className="font-mono text-xs text-ink-faint">
           © {year} {siteConfig.name}.
+          {sha && (
+            <>
+              {" · "}
+              {sha === "dev" ? (
+                <span>build dev</span>
+              ) : (
+                <a
+                  href={`https://github.com/BradyBangasser/bangasser.dev/commit/${sha}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="no-underline hover:text-accent"
+                >
+                  build {sha}
+                </a>
+              )}
+            </>
+          )}
         </p>
         <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
           <a
