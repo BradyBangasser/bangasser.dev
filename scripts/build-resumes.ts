@@ -25,8 +25,55 @@ import {
 const ROOT = process.cwd();
 const TEMPLATE_FILE: Record<string, string> = { designed: "resume.typ", ats: "resume-ats.typ" };
 
+// A repo's .resume.yml is the ultimate truth for that project: it defines one
+// project entry (name/period/tech/tags/bullets) that overrides any hand-authored
+// entry of the same id in resume.yml. `resume: false` (or `index: false`) opts
+// out. Bad YAML is skipped with a warning rather than failing the build.
+function mergeRepoResumeEntries(master: any): void {
+  const gen = path.join(ROOT, "content", "projects", "_generated.json");
+  if (!fs.existsSync(gen)) return;
+  let generated: any[];
+  try {
+    generated = JSON.parse(fs.readFileSync(gen, "utf8")).projects ?? [];
+  } catch {
+    return;
+  }
+  master.projects = master.projects ?? [];
+  for (const g of generated) {
+    if (!g.resumeYml) continue;
+    let entry: any;
+    try {
+      entry = yaml.load(g.resumeYml);
+    } catch (e) {
+      console.warn(`[resume] ${g.fullName}: bad .resume.yml (${(e as Error).message}); skipped`);
+      continue;
+    }
+    if (!entry || typeof entry !== "object") continue;
+    if (entry.resume === false || entry.index === false) continue; // opt-out
+    const bullets = Array.isArray(entry.bullets) ? entry.bullets : [];
+    if (bullets.length === 0) {
+      console.warn(`[resume] ${g.fullName}: .resume.yml has no bullets; skipped`);
+      continue;
+    }
+    const proj: any = {
+      id: entry.id ?? g.slug,
+      name: entry.name ?? g.name,
+      period: entry.period ?? (g.pushedAt ? String(g.pushedAt).slice(0, 4) : ""),
+      tags: entry.tags ?? ["software"],
+      tech: entry.tech ?? [],
+      bullets,
+    };
+    if (entry.pin !== undefined) proj.pin = entry.pin;
+    const i = master.projects.findIndex((p: any) => p.id === proj.id);
+    if (i >= 0) master.projects[i] = proj;
+    else master.projects.push(proj);
+    console.log(`[resume] indexed ${g.fullName} .resume.yml as project "${proj.id}"`);
+  }
+}
+
 function main() {
   const master: any = yaml.load(fs.readFileSync(path.join(ROOT, "resume/resume.yml"), "utf8"));
+  mergeRepoResumeEntries(master);
 
   fs.mkdirSync(path.join(ROOT, "lib"), { recursive: true });
   fs.writeFileSync(path.join(ROOT, "lib/resume-data.json"), JSON.stringify(master, null, 2));

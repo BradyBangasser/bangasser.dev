@@ -2,11 +2,13 @@ import Link from "next/link";
 import { ProfilePortrait } from "@/components/ProfilePortrait";
 import { PostCard } from "@/components/PostCard";
 import { ProjectCard } from "@/components/ProjectCard";
-import { getAllPosts, getAllProjects } from "@/lib/content";
+import { PipelineCarousel } from "@/components/PipelineCarousel";
+import { getAllPosts, getAllProjects, getPipelineArticles } from "@/lib/content";
 import { siteConfig } from "@/lib/site-config";
 
 export default function HomePage() {
   const posts = getAllPosts().slice(0, 3);
+  const pipeline = getPipelineArticles();
   const projects = getAllProjects()
     .filter((p) => p.featured)
     .slice(0, 3);
@@ -76,6 +78,15 @@ export default function HomePage() {
                 <ProjectCard key={project.slug} project={project} />
               ))}
             </div>
+          </div>
+        </section>
+      )}
+
+      {/* In the pipeline */}
+      {pipeline.length > 0 && (
+        <section className="border-t border-border-subtle">
+          <div className="mx-auto max-w-page px-6 py-16">
+            <PipelineCarousel articles={pipeline} />
           </div>
         </section>
       )}

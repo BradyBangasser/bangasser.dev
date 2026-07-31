@@ -38,3 +38,4 @@ public/resumes/
 lib/resume-data.json
 lib/resume-manifest.json
 public/typst/
+public/search-index.json

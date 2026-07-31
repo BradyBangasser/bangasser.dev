@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { siteConfig } from "@/lib/site-config";
+import { SearchDialog } from "@/components/SearchDialog";
 
 const links = [
   { href: "/about", label: "about" },
@@ -13,6 +14,10 @@ const links = [
   { href: "/resume", label: "resume" },
   { href: "/contact", label: "contact" },
 ];
+
+function openSearch() {
+  window.dispatchEvent(new Event("open-search"));
+}
 
 export function Nav() {
   const [open, setOpen] = useState(false);
@@ -54,7 +59,31 @@ export function Nav() {
               </Link>
             );
           })}
+          <button
+            type="button"
+            onClick={openSearch}
+            aria-label="Search"
+            className="ml-1 flex items-center gap-2 rounded-md border border-border-subtle px-2.5 py-2 font-mono text-xs text-ink-muted transition-colors hover:border-accent/50 hover:text-accent"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+              <circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" />
+            </svg>
+            <kbd className="text-[10px] tracking-wide">⌘K</kbd>
+          </button>
         </nav>
+
+        {/* mobile: search + hamburger */}
+        <div className="flex items-center gap-1 md:hidden">
+          <button
+            type="button"
+            onClick={openSearch}
+            aria-label="Search"
+            className="inline-flex items-center justify-center rounded-md p-2 text-ink-muted hover:bg-bg-elevated hover:text-ink"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+              <circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" />
+            </svg>
+          </button>
 
         {/* mobile hamburger — three bars that morph into an X */}
         <button
@@ -71,6 +100,7 @@ export function Nav() {
             <span className={`absolute left-0 block h-0.5 w-6 rounded-full bg-current transition-all duration-300 ease-in-out ${open ? "bottom-1/2 translate-y-1/2 -rotate-45" : "bottom-0"}`} />
           </span>
         </button>
+        </div>
       </div>
 
       {/* mobile dropdown panel — slides open, always mounted so it can animate */}
@@ -104,6 +134,8 @@ export function Nav() {
           })}
         </ul>
       </nav>
+
+      <SearchDialog />
     </header>
   );
 }

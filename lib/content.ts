@@ -55,6 +55,9 @@ export interface Project extends ProjectFrontmatter {
   related?: string[];
   external?: boolean;
   pushedAt?: string;
+  docsReadme?: string | null;
+  docsUrl?: string | null;
+  posts?: RepoBlogPost[];
 }
 
 function readAllSlugs(dir: string): string[] {
@@ -116,6 +119,15 @@ export function getAllTags(posts: Post[]): string[] {
 // Projects
 // ---------------------------------------------------------------------------
 
+export interface RepoBlogPost {
+  slug: string;
+  title: string;
+  date: string;
+  summary: string;
+  tags: string[];
+  content: string;
+}
+
 export interface GeneratedProject {
   slug: string;
   name: string;
@@ -131,8 +143,12 @@ export interface GeneratedProject {
   active: boolean;
   defaultBranch: string;
   hasDocs: boolean;
+  docsReadme: string | null;
+  docsUrl: string | null;
   hasBlog: boolean;
+  posts: RepoBlogPost[];
   hasResumeYml: boolean;
+  resumeYml: string | null;
   related: string[];
   readme: string | null;
   external: boolean;
@@ -189,7 +205,47 @@ function mergeProject(g: GeneratedProject): Project {
     related: g.related,
     external: g.external,
     pushedAt: g.pushedAt,
+    docsReadme: g.docsReadme,
+    docsUrl: g.docsUrl,
+    posts: g.posts ?? [],
   };
+}
+
+// Repo blog posts flattened across all projects, routed at
+// /blog/{projectSlug}/content/{slug}. Distinct from site posts (/blog/{slug}).
+export interface RepoPost extends RepoBlogPost {
+  projectSlug: string;
+  projectTitle: string;
+  readingMinutes: number;
+}
+
+export function getGeneratedPosts(): RepoPost[] {
+  const out: RepoPost[] = [];
+  for (const g of getGeneratedProjects()) {
+    for (const p of g.posts ?? []) {
+      out.push({
+        ...p,
+        projectSlug: g.slug,
+        projectTitle: g.name,
+        readingMinutes: Math.max(1, Math.round(readingTime(p.content).minutes)),
+      });
+    }
+  }
+  return out.sort((a, b) => (a.date < b.date ? 1 : -1));
+}
+
+export function getRepoPost(projectSlug: string, slug: string): RepoPost | null {
+  return getGeneratedPosts().find((p) => p.projectSlug === projectSlug && p.slug === slug) ?? null;
+}
+
+// "In the pipeline": the latest article from each project that has one, newest
+// first. Status-agnostic — every project with writing is represented once.
+export function getPipelineArticles(): RepoPost[] {
+  const latestByProject = new Map<string, RepoPost>();
+  for (const p of getGeneratedPosts()) {
+    if (!latestByProject.has(p.projectSlug)) latestByProject.set(p.projectSlug, p);
+  }
+  return Array.from(latestByProject.values()).sort((a, b) => (a.date < b.date ? 1 : -1));
 }
 
 export function getAllProjects(): Project[] {
