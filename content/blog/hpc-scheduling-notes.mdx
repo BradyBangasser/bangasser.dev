@@ -26,8 +26,8 @@ def can_backfill(job, head_job, cluster_free_at):
     return finish_time <= cluster_free_at[head_job.required_nodes]
 ```
 
-This is a simplification — real schedulers account for multiple reserved
-jobs, heterogeneous node pools, and runtime estimate error — but the core
+This is a simplification - real schedulers account for multiple reserved
+jobs, heterogeneous node pools, and runtime estimate error - but the core
 idea holds: predictability of runtime estimates matters as much as the
 scheduling algorithm itself.
 
@@ -40,7 +40,7 @@ where a user's priority decays based on recent usage.
 
 ## Where this gets interesting
 
-The hard part isn't the scheduling algorithm — it's the feedback loop
+The hard part isn't the scheduling algorithm - it's the feedback loop
 between users, runtime estimates, and priority. Users learn to game
 whatever heuristic you publish. That's less a scheduling problem than an
 incentive design problem, which is part of why I find this area more

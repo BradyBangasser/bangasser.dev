@@ -1,14 +1,16 @@
 import Link from "next/link";
-import { ProfilePortrait } from "@/components/ProfilePortrait";
+import { RandomPortrait } from "@/components/RandomPortrait";
 import { PostCard } from "@/components/PostCard";
 import { ProjectCard } from "@/components/ProjectCard";
 import { PipelineCarousel } from "@/components/PipelineCarousel";
 import { getAllPosts, getAllProjects, getPipelineArticles } from "@/lib/content";
+import { poolPhotos } from "@/lib/photo";
 import { siteConfig } from "@/lib/site-config";
 
 export default function HomePage() {
   const posts = getAllPosts().slice(0, 3);
   const pipeline = getPipelineArticles();
+  const photos = poolPhotos();
   const projects = getAllProjects()
     .filter((p) => p.featured)
     .slice(0, 3);
@@ -35,15 +37,15 @@ export default function HomePage() {
                 View projects
               </Link>
               <Link
-                href="/consulting"
+                href="/resume"
                 className="rounded-lg border border-border px-5 py-2.5 text-sm font-medium text-ink no-underline transition-colors hover:border-accent/50 hover:text-accent"
               >
-                Consulting services
+                Resume
               </Link>
             </div>
           </div>
           <div className="flex justify-center lg:justify-end">
-            <ProfilePortrait />
+            <RandomPortrait photos={photos} priority glow />
           </div>
         </div>
       </section>
@@ -110,22 +112,22 @@ export default function HomePage() {
         </section>
       )}
 
-      {/* Consulting teaser */}
-      <section className="border-t border-border-subtle">
-        <div className="mx-auto max-w-page px-6 py-16">
-          <p className="eyebrow mb-3">// consulting</p>
-          <h2 className="max-w-prose text-xl font-medium text-ink sm:text-2xl">
-            Reliability, cloud security, and infrastructure consulting for teams
-            that need senior systems help on a project basis.
-          </h2>
-          <Link
-            href="/consulting"
-            className="mt-6 inline-block rounded-lg border border-border px-5 py-2.5 text-sm font-medium text-ink no-underline transition-colors hover:border-accent/50 hover:text-accent"
-          >
-            Learn more
-          </Link>
-        </div>
-      </section>
+      {/* Consulting - low-key, flag-gated */}
+      {siteConfig.features.consulting && (
+        <section className="border-t border-border-subtle">
+          <div className="mx-auto flex max-w-page flex-wrap items-baseline justify-between gap-2 px-6 py-8">
+            <p className="text-sm text-ink-muted">
+              Available for a limited number of reliability, cloud, and infrastructure engagements.
+            </p>
+            <Link
+              href="/consulting"
+              className="font-mono text-xs text-ink-muted no-underline hover:text-accent"
+            >
+              consulting →
+            </Link>
+          </div>
+        </section>
+      )}
     </>
   );
 }

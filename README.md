@@ -1,6 +1,6 @@
 # bangasser.dev
 
-Brady Bangasser's personal site — Next.js 16 (App Router) + TypeScript +
+Brady Bangasser's personal site - Next.js 16 (App Router) + TypeScript +
 Tailwind, MDX content, self-hostable via Docker.
 
 ## Stack
@@ -24,7 +24,7 @@ Visit `http://localhost:3000`.
 `npm run dev` and `npm run build` both run `scripts/fetch-github.ts` first
 (via the `predev` / `prebuild` npm hooks) to refresh the auto-generated
 project list from GitHub. If GitHub is unreachable, the build still
-succeeds — it just falls back to the last snapshot (or an empty list on
+succeeds - it just falls back to the last snapshot (or an empty list on
 the very first run).
 
 ## Adding content
@@ -47,7 +47,7 @@ automatically.
 ```
 
 `type: "short"` is for quick notes; `type: "long"` gets the same layout
-plus is labeled as a deep dive. There's no length enforcement — `type` is
+plus is labeled as a deep dive. There's no length enforcement - `type` is
 just a label, use it however feels right.
 
 ### Projects
@@ -61,9 +61,9 @@ date: "2026-07-03"
 summary: "One sentence."
 tags: ["cloud", "security"]
 status: "active"   # active | archived | concept
-repo: "BradyBangasser/repo-name"   # optional — links to GitHub
-externalUrl: "https://example.com"  # optional — live demo link
-featured: true   # optional — surfaces it on the home page
+repo: "BradyBangasser/repo-name"   # optional - links to GitHub
+externalUrl: "https://example.com"  # optional - live demo link
+featured: true   # optional - surfaces it on the home page
 ---
 
 Write-up goes here.
@@ -75,14 +75,14 @@ page, generated at build time.
 
 ### Editing your bio, links, and services
 
-Everything else — name, bio, education, focus areas, social links,
-consulting services, default SEO copy — lives in one file:
+Everything else - name, bio, education, focus areas, social links,
+consulting services, default SEO copy - lives in one file:
 **`lib/site-config.ts`**. Edit that, nothing else needs to change for
 routine content updates. Leave any `social.*` field as `""` to hide it.
 
 ### Resume
 
-Drop a PDF at `public/resume.pdf` — the Resume page already links to it.
+Drop a PDF at `public/resume.pdf` - the Resume page already links to it.
 
 ## Theming
 
@@ -95,19 +95,19 @@ values there to re-theme the whole site.
 
 - Per-page `<title>`/description via each page's `generateMetadata` /
   `metadata` export
-- `app/sitemap.ts` and `app/robots.ts` — generated automatically from your
+- `app/sitemap.ts` and `app/robots.ts` - generated automatically from your
   content
-- `app/rss.xml/route.ts` — RSS feed of blog posts
+- `app/rss.xml/route.ts` - RSS feed of blog posts
 - JSON-LD structured data: `Person` (root layout) and `Article` (each blog
   post)
 - Auto-generated favicon (`app/icon.tsx`) and social share image
-  (`app/opengraph-image.tsx`) — no image files to manage
+  (`app/opengraph-image.tsx`) - no image files to manage
 
 Update `siteConfig.url` in `lib/site-config.ts` if the domain ever changes.
 
 ## Deployment (self-hosted)
 
-This is built to run anywhere via Docker — no platform lock-in.
+This is built to run anywhere via Docker - no platform lock-in.
 
 ```bash
 docker compose up -d --build
@@ -120,7 +120,7 @@ automatic HTTPS.
 
 **CI/CD:** `.github/workflows/docker-build.yml` builds and pushes an image
 to GitHub Container Registry (`ghcr.io`) on every push to `main`. There's a
-commented-out SSH deploy step at the bottom of that file — uncomment it and
+commented-out SSH deploy step at the bottom of that file - uncomment it and
 add `SSH_HOST` / `SSH_USER` / `SSH_KEY` as repo secrets to auto-deploy to
 your own server after each push.
 

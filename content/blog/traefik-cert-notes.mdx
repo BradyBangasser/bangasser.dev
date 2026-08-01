@@ -12,7 +12,7 @@ instance running rootless under Podman, doing host-based routing, and
 terminating TLS for public hostnames through Let's Encrypt and for internal
 hostnames through a self-hosted step-ca. Backends register themselves with
 container labels and join a shared external network, so adding a service is
-a single `compose up` that the proxy picks up within about a second — no
+a single `compose up` that the proxy picks up within about a second - no
 change to the proxy's own configuration.
 
 ```
@@ -50,8 +50,8 @@ The two things I optimized for were multi-cloud portability and keeping the
 standing cost close to the cost of the compute itself.
 
 The architectural difference underneath both is control-plane topology.
-Kubernetes is centralized: every node depends on a control plane — API
-server, etcd, scheduler — and a node that loses the control plane is a node
+Kubernetes is centralized: every node depends on a control plane - API
+server, etcd, scheduler - and a node that loses the control plane is a node
 that can't do much. The rootless model is the opposite. Each host is an
 autonomous peer that carries its own routing, its own certificate issuance,
 and its own service definitions, with no central brain it reports to and no
@@ -64,7 +64,7 @@ On cost, the comparison is direct. An EKS control plane is $72/month before
 a single workload runs, and once the EC2 or Fargate capacity behind it is
 counted, a modest cluster reaches several hundred dollars a month. For a
 home-lab-scale deployment and a set of small applications, that baseline is
-the dominant line item — I'd be paying more for the orchestrator than for the
+the dominant line item - I'd be paying more for the orchestrator than for the
 things it orchestrates.
 
 The rootless approach removes that baseline. A service definition is portable
@@ -89,7 +89,7 @@ agnostic.
 The trade-off is centralization. There's no single API describing the whole
 fleet, no built-in scheduler placing workloads, and no cluster-wide health
 view unless I build one. Running replicas of a single service within one
-instance or region — the thing Kubernetes makes trivial — is not something
+instance or region - the thing Kubernetes makes trivial - is not something
 this design does for free. That's a real limitation, covered below rather than
 glossed over.
 
@@ -105,7 +105,7 @@ across clouds and regions. A deployment that moves unchanged between an Azure
 instance in Central US and a cheaper provider elsewhere lets me place a job
 wherever GPU capacity is cheapest at the time, rather than being anchored to
 one provider's cluster. Against a GPU bill, the control-plane savings are
-almost incidental — but the portability that produces them is exactly what
+almost incidental - but the portability that produces them is exactly what
 makes chasing cheaper capacity practical.
 
 For deployment, serving a model becomes the same one-step operation as any
@@ -115,13 +115,13 @@ endpoint is a `compose up`, and scaling out is adding peers rather than
 reconfiguring a cluster.
 
 The NAT-friendliness matters here too. Training hosts often live in varied
-environments — a rented GPU box, a machine behind a home or lab firewall — and
+environments - a rented GPU box, a machine behind a home or lab firewall - and
 because certificate issuance is outbound-only, those nodes need no inbound
 exposure at all. They can pull work and serve results without a public
 ingress path.
 
-The honest boundary: tightly-coupled, multi-node distributed training — the
-kind that needs gang scheduling and high-bandwidth interconnect — is where
+The honest boundary: tightly-coupled, multi-node distributed training - the
+kind that needs gang scheduling and high-bandwidth interconnect - is where
 Kubernetes with Kubeflow or Volcano, or a purpose-built scheduler like Slurm,
 genuinely earns its complexity. This design fits single-node training jobs and
 inference serving well; it is not where I'd run synchronous multi-node
@@ -144,7 +144,7 @@ socket could launch arbitrary workloads. It's the most security-relevant line
 in the configuration.
 
 **Certificates are managed per container.** Each backend declares, in its own
-labels, the hostname it answers for and which issuer certifies it — Let's
+labels, the hostname it answers for and which issuer certifies it - Let's
 Encrypt for a publicly-trusted certificate, or the private step-ca for an
 internal one. The proxy reads those labels and requests, stores, and renews a
 distinct certificate per container, selecting the right one by SNI at the
@@ -152,7 +152,7 @@ handshake. Nothing is defined centrally: a container owns its own TLS
 identity, and adding one with its own certificate is a label change on that
 container alone. Two issuers are available because the fleet spans public and
 internal names, but the choice is made per container rather than by a global
-rule, and the same discipline keeps the trust boundaries clean — a public name
+rule, and the same discipline keeps the trust boundaries clean - a public name
 points at the public issuer, an internal name at the private one, each decided
 where the service is defined.
 
@@ -186,7 +186,7 @@ hosts. The points where it stops fitting are specific:
   I'd address.
 - **Single-host service discovery.** Traefik reads one host's Podman socket,
   so it only routes to backends on its own host. Cross-host routing requires
-  the file provider or an additional discovery mechanism — at which point I'm
+  the file provider or an additional discovery mechanism - at which point I'm
   rebuilding a piece of what a scheduler provides.
 - **Manual placement.** Workloads land where I put them; there's no
   bin-packing or scheduling across a pool.
@@ -197,17 +197,17 @@ hosts. The points where it stops fitting are specific:
 The direction I'm most interested in is turning the autonomous-peer property
 into an actual highly-available peer network. Each host is already
 self-sufficient; what's missing is a flat network tying hosts together across
-clouds and a failover mechanism in front. A mesh overlay — WireGuard directly,
-or Tailscale/Nebula on top of it — would give every host a stable address to
+clouds and a failover mechanism in front. A mesh overlay - WireGuard directly,
+or Tailscale/Nebula on top of it - would give every host a stable address to
 every other regardless of provider or NAT, letting Traefik on any peer route
 to a backend on any other through the file provider. Paired with DNS-level
 failover, that converts today's single-node setup into a decentralized fleet
-with no central control plane and no single point of failure — the HA story
+with no central control plane and no single point of failure - the HA story
 this architecture is shaped for, without adopting a centralized scheduler to
 get it.
 
-Short of that, a reasonable next step is a lightweight orchestrator — Nomad,
-Swarm, or k3s —
+Short of that, a reasonable next step is a lightweight orchestrator - Nomad,
+Swarm, or k3s -
 which would provide the replica placement and cross-host scheduling this setup
 lacks. I deferred that because each reintroduces the standing cost and failure
 surface I was avoiding: a control plane with its own cluster state to operate,

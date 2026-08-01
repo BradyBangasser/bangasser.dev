@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import { siteConfig } from "@/lib/site-config";
-import { publicFileExists } from "@/lib/photo";
+import { poolPhotos } from "@/lib/photo";
+import { RandomPortrait } from "@/components/RandomPortrait";
 import { ResumeHighlights } from "@/components/ResumeHighlights";
 
 export const metadata: Metadata = {
@@ -11,8 +11,7 @@ export const metadata: Metadata = {
 
 export default function AboutPage() {
   const paragraphs = siteConfig.bio.trim().split(/\n\n+/);
-  const { src: aboutSrc, alt: aboutAlt } = siteConfig.photo.about;
-  const hasAboutPhoto = publicFileExists(aboutSrc);
+  const photos = poolPhotos();
 
   return (
     <div className="mx-auto max-w-page px-6 py-14 sm:py-20">
@@ -27,17 +26,7 @@ export default function AboutPage() {
         </div>
 
         <div className="space-y-8">
-          {hasAboutPhoto && (
-            <div className="relative aspect-[4/3] overflow-hidden rounded-xl border border-border bg-bg-elevated">
-              <Image
-                src={aboutSrc}
-                alt={aboutAlt}
-                fill
-                sizes="(max-width: 1024px) 90vw, 420px"
-                className="object-cover"
-              />
-            </div>
-          )}
+          <RandomPortrait photos={photos} aspect="aspect-[4/3]" sizes="(max-width: 1024px) 90vw, 420px" />
 
           <div>
             <h2 className="eyebrow mb-3">education</h2>
@@ -72,6 +61,7 @@ export default function AboutPage() {
           )}
         </div>
       </div>
+
 
       <div className="mt-16 border-t border-border-subtle pt-12">
         <ResumeHighlights />

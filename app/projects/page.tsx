@@ -31,7 +31,7 @@ export default async function ProjectsPage({
       <h1 className="text-3xl font-semibold sm:text-4xl">Projects</h1>
       <p className="mt-3 max-w-prose text-ink-muted">
         Every repo, pulled live from GitHub at build time
-        {activeCount > 0 ? ` — ${activeCount} active right now` : ""}. A README is
+        {activeCount > 0 ? ` - ${activeCount} active right now` : ""}. A README is
         the project&apos;s overview; a curated write-up, when present, adds narration.
       </p>
 

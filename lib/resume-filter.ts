@@ -1,9 +1,9 @@
-// Runtime résumé selection — the "algorithm that picks tags for each parameter."
+// Runtime résumé selection - the "algorithm that picks tags for each parameter."
 // This replaces the 72 pre-generated per-variant files: the browser filters the
 // single master (resume-data.json) by (preset, length) at runtime, then the
 // page-fit happens in typst.ts so the length matches the engine that renders.
 //
-// Ported 1:1 from resume/build.py (build_data + trim_once) — kept in lockstep.
+// Ported 1:1 from resume/build.py (build_data + trim_once) - kept in lockstep.
 
 export type Bullet = { text: string; tags?: string[]; priority?: number };
 export type Master = any;

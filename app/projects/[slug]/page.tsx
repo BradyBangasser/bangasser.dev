@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getAllProjects, getProjectBySlug } from "@/lib/content";
 import { renderMarkdown } from "@/lib/markdown";
+import { relativeTime, languageColor } from "@/lib/repo-meta";
 import { siteConfig } from "@/lib/site-config";
 
 export async function generateStaticParams() {
@@ -50,15 +51,21 @@ export default async function ProjectPage({
       </Link>
 
       <header className="mt-6 max-w-prose">
-        <div className="mb-3 flex flex-wrap items-center gap-2 font-mono text-[11px] uppercase tracking-wide text-ink-faint">
-          <span className="text-cyan">{project.status}</span>
-          <time dateTime={project.date}>
-            {new Date(project.date).toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "short",
-              day: "numeric",
-            })}
-          </time>
+        <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[11px] text-ink-faint">
+          <span className="inline-flex items-center gap-1.5">
+            <span className={`status-dot ${project.active ? "status-dot--active" : "status-dot--idle"}`} aria-hidden="true" />
+            <span className={project.active ? "text-cyan" : ""}>
+              {project.active ? "active" : `updated ${relativeTime(project.pushedAt ?? project.date)}`}
+            </span>
+          </span>
+          {project.language && (
+            <span className="inline-flex items-center gap-1.5">
+              <span className="h-2 w-2 rounded-full" style={{ background: languageColor(project.language) }} aria-hidden="true" />
+              {project.language}
+            </span>
+          )}
+          {typeof project.stars === "number" && project.stars > 0 && <span>★ {project.stars}</span>}
+          {typeof project.openIssues === "number" && project.openIssues > 0 && <span>{project.openIssues} open</span>}
         </div>
         <h1 className="text-3xl font-semibold sm:text-4xl">{project.title}</h1>
         <p className="mt-3 text-ink-muted">{project.summary}</p>

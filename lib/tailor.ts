@@ -141,7 +141,7 @@ export async function webllmTailor(
   onProgress?: (p: TailorProgress) => void,
 ): Promise<TailorResult> {
   const presetLines = Object.entries(manifest.presets)
-    .map(([id, p]) => `${id}: ${p.label} — ${p.headline}`).join("\n");
+    .map(([id, p]) => `${id}: ${p.label} - ${p.headline}`).join("\n");
   const system =
     "You match a job description to the best-fitting resume preset. " +
     'Reply with ONLY a compact JSON object like {"preset":"<id>","length":"onepage|twopage","template":"designed|ats"}. ' +

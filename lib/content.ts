@@ -33,7 +33,7 @@ export interface ProjectFrontmatter {
   summary: string;
   tags: string[];
   status: ProjectStatus;
-  repo?: string; // e.g. "BradyBangasser/some-repo" — links a curated write-up to a GitHub repo
+  repo?: string; // e.g. "BradyBangasser/some-repo" - links a curated write-up to a GitHub repo
   externalUrl?: string;
   draft?: boolean;
   coverImage?: string;
@@ -239,13 +239,59 @@ export function getRepoPost(projectSlug: string, slug: string): RepoPost | null 
 }
 
 // "In the pipeline": the latest article from each project that has one, newest
-// first. Status-agnostic — every project with writing is represented once.
+// first. Status-agnostic - every project with writing is represented once.
 export function getPipelineArticles(): RepoPost[] {
   const latestByProject = new Map<string, RepoPost>();
   for (const p of getGeneratedPosts()) {
     if (!latestByProject.has(p.projectSlug)) latestByProject.set(p.projectSlug, p);
   }
   return Array.from(latestByProject.values()).sort((a, b) => (a.date < b.date ? 1 : -1));
+}
+
+// Unified writing feed: site posts (/blog/{slug}) and repo articles
+// (/blog/{project}/content/{slug}) merged and sorted newest-first.
+export interface WritingItem {
+  href: string;
+  title: string;
+  date: string;
+  summary: string;
+  tags: string[];
+  readingMinutes: number;
+  kind: "post" | "article";
+  postType?: PostType;
+  projectSlug?: string;
+  projectTitle?: string;
+}
+
+export function getAllWriting(): WritingItem[] {
+  const posts: WritingItem[] = getAllPosts().map((p) => ({
+    href: `/blog/${p.slug}`,
+    title: p.title,
+    date: p.date,
+    summary: p.summary ?? "",
+    tags: p.tags ?? [],
+    readingMinutes: p.readingMinutes,
+    kind: "post",
+    postType: p.type,
+  }));
+  const articles: WritingItem[] = getGeneratedPosts().map((a) => ({
+    href: `/blog/${a.projectSlug}/content/${a.slug}`,
+    title: a.title,
+    date: a.date,
+    summary: a.summary ?? "",
+    tags: a.tags ?? [],
+    readingMinutes: a.readingMinutes,
+    kind: "article",
+    projectSlug: a.projectSlug,
+    projectTitle: a.projectTitle,
+  }));
+  return [...posts, ...articles].sort((a, b) => (a.date < b.date ? 1 : -1));
+}
+
+export function getAllWritingTags(items: WritingItem[]): string[] {
+  const tags = new Set<string>();
+  items.forEach((i) => i.tags?.forEach((t) => tags.add(t)));
+  return Array.from(tags).sort();
 }
 
 export function getAllProjects(): Project[] {

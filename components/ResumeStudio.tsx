@@ -157,7 +157,7 @@ export function ResumeStudio({ manifest }: { manifest: Manifest }) {
                   modelState === "off" ? (
                     <div className="mt-3 rounded-lg border border-border-subtle bg-bg-elevated px-4 py-3">
                       <p className="text-sm text-ink-muted">
-                        Optionally run a small AI model <span className="text-ink">entirely in your browser</span> —
+                        Optionally run a small AI model <span className="text-ink">entirely in your browser</span> -
                         private, free, nothing sent to a server. It downloads once ({MODEL_SIZE}) and is cached after.
                       </p>
                       <div className="mt-3 flex flex-wrap gap-2">
@@ -227,16 +227,30 @@ export function ResumeStudio({ manifest }: { manifest: Manifest }) {
         </div>
 
         <div className="lg:sticky lg:top-24">
-          <div className="flex min-h-[78vh] items-center justify-center overflow-hidden rounded-xl border border-border bg-bg-elevated">
-            {viewUrl ? (
-              <object data={`${viewUrl}#toolbar=0`} type="application/pdf" className="h-[78vh] w-full">
-                <div className="p-6 text-sm text-ink-muted">
-                  Preview unavailable here. <a href={viewUrl} className="text-accent">Open the PDF</a>.
-                </div>
-              </object>
-            ) : (
-              <div className="p-6 text-sm text-ink-muted">No resume for that combination.</div>
-            )}
+          <div className="overflow-hidden rounded-xl border border-border bg-bg-elevated">
+            <div className="flex items-center justify-between border-b border-border-subtle px-4 py-2.5 font-mono text-xs text-ink-faint">
+              <span className="truncate">
+                <span className="text-ink-faint">~/resume/</span>
+                <span className="text-ink-muted">{baseName}.pdf</span>
+              </span>
+              {current && (
+                <span className="shrink-0 text-cyan">
+                  {current.pages} page{current.pages > 1 ? "s" : ""}
+                </span>
+              )}
+            </div>
+            <div className="flex min-h-[74vh] items-center justify-center">
+              {viewUrl ? (
+                <object data={`${viewUrl}#toolbar=0`} type="application/pdf" className="h-[74vh] w-full">
+                  <div className="p-6 text-sm text-ink-muted">
+                    Preview unavailable here.{" "}
+                    <a href={viewUrl} className="text-accent">Open the PDF</a>.
+                  </div>
+                </object>
+              ) : (
+                <div className="p-6 text-sm text-ink-muted">No resume for that combination.</div>
+              )}
+            </div>
           </div>
         </div>
       </div>

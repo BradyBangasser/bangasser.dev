@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { siteConfig } from "@/lib/site-config";
 
 export const metadata: Metadata = {
@@ -8,6 +9,8 @@ export const metadata: Metadata = {
 };
 
 export default function ConsultingPage() {
+  if (!siteConfig.features.consulting) notFound();
+
   return (
     <div className="mx-auto max-w-page px-6 py-14 sm:py-20">
       <p className="eyebrow mb-4">// consulting</p>

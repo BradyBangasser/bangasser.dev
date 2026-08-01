@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { siteConfig } from "@/lib/site-config";
+import { poolPhotos } from "@/lib/photo";
+import { RandomPortrait } from "@/components/RandomPortrait";
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -18,13 +20,16 @@ const socialLinks: { key: keyof typeof siteConfig.social; label: string }[] = [
 
 export default function ContactPage() {
   const activeSocials = socialLinks.filter((s) => siteConfig.social[s.key]);
+  const photos = poolPhotos();
 
   return (
     <div className="mx-auto max-w-page px-6 py-14 sm:py-20">
+      <div className="grid gap-10 lg:grid-cols-[1.4fr_0.9fr] lg:items-start">
+        <div>
       <p className="eyebrow mb-4">// contact</p>
       <h1 className="text-3xl font-semibold sm:text-4xl">Get in touch</h1>
       <p className="mt-4 max-w-prose text-ink-muted">
-        Email is the best way to reach me — for consulting inquiries, research
+        Email is the best way to reach me - for consulting inquiries, research
         collaboration, or anything else.
       </p>
 
@@ -53,6 +58,14 @@ export default function ContactPage() {
           </div>
         </div>
       )}
+        </div>
+
+        {photos.length > 0 && (
+          <div className="hidden lg:block lg:pt-2">
+            <RandomPortrait photos={photos} sizes="(max-width: 1024px) 0px, 320px" />
+          </div>
+        )}
+      </div>
     </div>
   );
 }

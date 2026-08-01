@@ -15,3 +15,14 @@ export function publicFileExists(src: string): boolean {
     return false;
   }
 }
+
+/**
+ * The subset of siteConfig.photo.pool whose files actually exist on disk.
+ * Server-only (uses fs); pass the result to the RandomPortrait client
+ * component so the random pick never lands on a missing file.
+ */
+import { siteConfig } from "@/lib/site-config";
+
+export function poolPhotos(): { src: string; alt: string }[] {
+  return (siteConfig.photo.pool ?? []).filter((p) => publicFileExists(p.src));
+}

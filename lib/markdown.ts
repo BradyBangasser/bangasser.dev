@@ -1,6 +1,6 @@
 // Robust, sanitized Markdown -> HTML for repo-sourced content (READMEs, docs,
 // repo blog posts). Unlike the MDX pipeline, this never throws on raw HTML,
-// stray braces, or unclosed tags — exactly what arbitrary READMEs contain.
+// stray braces, or unclosed tags - exactly what arbitrary READMEs contain.
 
 import { unified } from "unified";
 import remarkParse from "remark-parse";

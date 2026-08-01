@@ -3,7 +3,7 @@ import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
 import { siteConfig } from "@/lib/site-config";
 
-// Self-hosted fonts (no runtime/build-time dependency on Google's font CDN —
+// Self-hosted fonts (no runtime/build-time dependency on Google's font CDN -
 // important for self-hosted builds behind a firewall or offline CI runners).
 import "@fontsource/space-grotesk/500.css";
 import "@fontsource/space-grotesk/600.css";

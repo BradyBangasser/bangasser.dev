@@ -29,7 +29,7 @@
     color: #fff;
   }
 
-  /* Visible keyboard focus everywhere — no outline: none anywhere in this project */
+  /* Visible keyboard focus everywhere - no outline: none anywhere in this project */
   :focus-visible {
     outline: 2px solid theme("colors.accent.DEFAULT");
     outline-offset: 3px;
@@ -61,7 +61,26 @@
   .tag-pill[data-active="true"] {
     @apply border-accent/60 bg-accent-dim text-accent-soft;
   }
+
+  /* live-repo status dot — pulses cyan while a project is active */
+  .status-dot {
+    @apply inline-block h-1.5 w-1.5 rounded-full;
+  }
+  .status-dot--active {
+    background: #22d3ee;
+    animation: pulse-dot 2.4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  .status-dot--idle {
+    @apply bg-ink-faint;
+  }
 }
+
+@keyframes pulse-dot {
+  0% { box-shadow: 0 0 0 0 rgba(34, 211, 238, 0.5); }
+  70% { box-shadow: 0 0 0 5px rgba(34, 211, 238, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(34, 211, 238, 0); }
+}
+
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

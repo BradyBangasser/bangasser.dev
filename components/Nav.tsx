@@ -10,7 +10,7 @@ const links = [
   { href: "/about", label: "about" },
   { href: "/projects", label: "projects" },
   { href: "/blog", label: "blog" },
-  { href: "/consulting", label: "consulting" },
+  ...(siteConfig.features.consulting ? [{ href: "/consulting", label: "consulting" }] : []),
   { href: "/resume", label: "resume" },
   { href: "/contact", label: "contact" },
 ];
@@ -35,7 +35,7 @@ export function Nav() {
           href="/"
           onClick={() => setOpen(false)}
           className="font-mono text-sm text-ink no-underline hover:text-accent"
-          aria-label={`${siteConfig.name} — home`}
+          aria-label={`${siteConfig.name} - home`}
         >
           <span className="text-ink-faint">brady@bangasser</span>
           <span className="text-accent">:</span>
@@ -85,7 +85,7 @@ export function Nav() {
             </svg>
           </button>
 
-        {/* mobile hamburger — three bars that morph into an X */}
+        {/* mobile hamburger - three bars that morph into an X */}
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
@@ -103,7 +103,7 @@ export function Nav() {
         </div>
       </div>
 
-      {/* mobile dropdown panel — slides open, always mounted so it can animate */}
+      {/* mobile dropdown panel - slides open, always mounted so it can animate */}
       <nav
         id="mobile-menu"
         aria-label="Primary"

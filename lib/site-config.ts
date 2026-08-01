@@ -4,8 +4,13 @@
 // ---------------------------------------------------------------------------
 
 export const siteConfig = {
+  // Feature flags. Flip a section off site-wide without touching components.
+  features: {
+    consulting: true, // shows the Consulting page, nav link, and a low-key home mention
+  },
+
   name: "Brady Bangasser",
-  role: "Platform & Site Reliability Engineering",
+  role: "Software & Systems Engineer",
   tagline:
     "I build and operate large-scale systems to stay fast, available, and secure, across HPC, multi-cloud infrastructure, and the automation that ships them.",
   url: "https://www.bangasser.dev",
@@ -23,6 +28,16 @@ export const siteConfig = {
       src: "/photos/brady-about.jpg",
       alt: "Brady Bangasser at the controls of a small aircraft",
     },
+    // Pool of photos of you. One is picked at random on the home, about, and
+    // contact pages (independently, so they usually differ). Add as many as you
+    // like; entries whose files are missing are skipped, and if none exist the
+    // pages fall back to a clean monogram. Drop files in /public/photos.
+    pool: [
+      { src: "/photos/brady-hero.jpg", alt: "Brady Bangasser" },
+      { src: "/photos/brady-about.jpg", alt: "Brady Bangasser flying a small aircraft" },
+      { src: "/photos/brady-climbing.jpg", alt: "Brady Bangasser rock climbing" },
+      { src: "/photos/brady-datacenter.jpg", alt: "Brady Bangasser in the datacenter" },
+    ] as { src: string; alt: string }[],
   },
 
   bio: `I'm a computer scientist finishing my Master's at Iowa State University,
@@ -31,7 +46,7 @@ systems performance. My focus is reliability and platform work: keeping
 large-scale systems fast, available, and secure, and making them easier to
 operate.
 
-That spans the whole stack — high-availability cluster and cloud
+That spans the whole stack - high-availability cluster and cloud
 infrastructure, observability and incident response, infrastructure as code,
 and the CI that ships it. Underneath, I work close to the metal: distributed
 systems, compiler and toolchain internals, and the cryptography and
@@ -43,7 +58,7 @@ When I'm not at a terminal, I'm usually flying or climbing.`,
     {
       title: "Reliability & Platform",
       description:
-        "High-availability systems, observability, and self-healing infrastructure built to survive failure — not just avoid it.",
+        "High-availability systems, observability, and self-healing infrastructure built to survive failure - not just avoid it.",
     },
     {
       title: "Cloud & Infrastructure",
@@ -53,7 +68,7 @@ When I'm not at a terminal, I'm usually flying or climbing.`,
     {
       title: "HPC & Distributed Systems",
       description:
-        "Cluster operations at scale — SLURM and Kubernetes scheduling, performance tuning, and distributed workloads.",
+        "Cluster operations at scale - SLURM and Kubernetes scheduling, performance tuning, and distributed workloads.",
     },
     {
       title: "Systems & Security",
@@ -76,7 +91,7 @@ When I'm not at a terminal, I'm usually flying or climbing.`,
 
   social: {
     github: "https://github.com/BradyBangasser",
-    // Fill these in as they go live — leave blank ("") to hide the link.
+    // Fill these in as they go live - leave blank ("") to hide the link.
     linkedin: "https://linkedin.com/in/bbangasser",
     x: "",
     bluesky: "",
@@ -112,7 +127,7 @@ When I'm not at a terminal, I'm usually flying or climbing.`,
       {
         title: "ML Model Penetration Testing",
         description:
-          "Adversarial evaluation of machine learning systems — model extraction, evasion, data leakage, and the attack surface around deployed models.",
+          "Adversarial evaluation of machine learning systems - model extraction, evasion, data leakage, and the attack surface around deployed models.",
       },
     ],
     contactNote:
@@ -120,10 +135,10 @@ When I'm not at a terminal, I'm usually flying or climbing.`,
   },
 
   seo: {
-    defaultTitle: "Brady Bangasser - HPC AI & Platform & Site Reliability Engineering",
-    titleTemplate: "%s — Brady Bangasser",
+    defaultTitle: "Brady Bangasser, Software & Systems Engineer",
+    titleTemplate: "%s · Brady Bangasser",
     defaultDescription:
-      "Brady Bangasser is a platform and site reliability engineer working on high-availability infrastructure, HPC, cloud security, and distributed systems.",
+      "Brady Bangasser is a software and systems engineer working across reliability, high-availability infrastructure, HPC, cloud security, compilers, and distributed systems.",
     keywords: [
       "Bangasser",
       "iowa state",

@@ -7,7 +7,6 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   build-and-push:
@@ -29,18 +28,34 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      # Produces a valid lowercase image ref (ghcr.io/owner/repo) with :latest
+      # and a :sha tag. GHCR rejects the uppercase owner in github.repository,
+      # so metadata-action's lowercasing is what makes the push actually work.
+      - name: Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository }}
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=sha,format=short
+
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
           context: .
           push: true
-          tags: ${{ env.IMAGE_NAME }}:latest
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          # Raises the GitHub API rate limit during the build-time repo scan.
+          build-args: |
+            GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
 
-      # --- Optional: deploy to your own server over SSH after the image is
-      # pushed. Uncomment and add SSH_HOST / SSH_USER / SSH_KEY as repo
-      # secrets, and point it at wherever your docker-compose.yml lives.
+      # --- Optional: deploy over SSH after the image is pushed. Add
+      # SSH_HOST / SSH_USER / SSH_KEY as repo secrets and point it at your
+      # docker-compose.yml.
       #
       # - name: Deploy over SSH
       #   uses: appleboy/ssh-action@v1
