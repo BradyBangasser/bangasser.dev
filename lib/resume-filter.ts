@@ -144,6 +144,120 @@ export function buildData(master: Master, preset: string, length: Length): Rende
   };
 }
 
+// ---------------------------------------------------------------------------
+// Weighted selection: every entry competes on base_weight x recency(start).
+// A greedy packer (in build-resumes) fills the page by score, borrowing
+// off-preset content when a preset runs dry, then nudges density to fill.
+// ---------------------------------------------------------------------------
+
+export const DEFAULT_WEIGHT = 5;   // 1-10 base scale; unset entries sit mid-pack
+export const HALF_LIFE_YEARS = 5;  // a job counts half as much 5 years after it started
+
+export function recency(start?: string, nowMs = Date.now()): number {
+  if (!start || start === "present") return 1;
+  const [y, mo] = start.split("-").map(Number);
+  const t = new Date(y, (mo || 1) - 1, 1).getTime();
+  const years = Math.max(0, (nowMs - t) / (365.25 * 86_400_000));
+  return Math.pow(0.5, years / HALF_LIFE_YEARS);
+}
+function entryScore(e: any): number {
+  return (e.weight ?? DEFAULT_WEIGHT) * recency(e.start);
+}
+
+export type PoolBullet = { text: string; onPreset: boolean; priority: number };
+export type Unit = {
+  kind: "experience" | "project";
+  id: string;
+  score: number;
+  onPreset: boolean;
+  head: any;
+  sortKey: string;
+  bullets: PoolBullet[];
+};
+export type Frame = {
+  meta: any; headline: string; summary: string;
+  education: any[]; skills: { group: string; items: string[] }[]; interests: string;
+};
+
+function orderBullets(bullets: Bullet[], preset: string): PoolBullet[] {
+  return (bullets ?? [])
+    .map((b) => ({ text: b.text, onPreset: hasTag(b.tags, preset, "twopage"), priority: b.priority ?? 1 }))
+    .sort((a, b) => Number(b.onPreset) - Number(a.onPreset) || a.priority - b.priority);
+}
+
+// The frame (always shown) plus every entry as a scored unit. Units are ranked
+// on-preset first, then by weight x recency, so the packer takes the strongest
+// relevant content first and borrows the rest to fill.
+export function buildPool(master: Master, preset: string): { frame: Frame; units: Unit[] } {
+  const p = master.presets[preset];
+  const education = [...(master.education ?? [])].sort(bySortKeyDesc)
+    .filter((e) => hasTag(e.tags, preset, "twopage"))
+    .map((e) => ({
+      degree: e.degree, school: e.school, location: e.location ?? "",
+      dates: dateRange(e.start ?? "", e.end ?? ""), gpa: e.gpa ?? "", honors: e.honors ?? "",
+      minors: e.minors ?? "",
+      lines: (e.notes ?? []).filter((n: any) => hasTag(n.tags, preset, "twopage")).map((n: any) => n.text),
+    }));
+  const skills = (master.skills ?? []).filter((g: any) => hasTag(g.tags, preset, "twopage"))
+    .map((g: any) => {
+      const items = (g.items ?? []).filter((i: any) => hasTag(i.tags, preset, "twopage")).map((i: any) => i.name);
+      return items.length ? { group: g.group, items } : null;
+    }).filter(Boolean) as any[];
+  const intr = master.interests;
+  const interests = intr && hasTag(intr.tags, preset, "twopage") ? intr.text : "";
+  const frame: Frame = { meta: master.meta, headline: p?.headline ?? "", summary: p?.summary ?? "", education, skills, interests };
+
+  const expUnits: Unit[] = (master.experience ?? []).map((x: any) => ({
+    kind: "experience", id: x.id ?? x.org, score: entryScore(x), onPreset: hasTag(x.tags, preset, "twopage"),
+    head: { title: x.title, org: x.org, location: x.location ?? "", dates: dateRange(x.start ?? "", x.end ?? "") },
+    sortKey: `${x.end === "present" ? "9999-99" : (x.end ?? "")}|${x.start ?? ""}`,
+    bullets: orderBullets(x.bullets, preset),
+  }));
+  const projUnits: Unit[] = (master.projects ?? []).map((pr: any) => ({
+    kind: "project", id: pr.id ?? pr.name, score: entryScore(pr), onPreset: hasTag(pr.tags, preset, "twopage"),
+    head: { name: pr.name, period: pr.period ?? "", tech: pr.tech ?? [] },
+    sortKey: `${pr.period ?? ""}|`,
+    bullets: orderBullets(pr.bullets, preset),
+  }));
+
+  const units = [...expUnits, ...projUnits]
+    .filter((u) => u.bullets.length >= 2)
+    .sort((a, b) => Number(b.onPreset) - Number(a.onPreset) || b.score - a.score);
+  return { frame, units };
+}
+
+// Turn a selection (each unit + how many bullets) into render data. Entries are
+// selected by score but displayed reverse-chronologically, the resume norm.
+export function assemble(
+  frame: Frame,
+  selection: { unit: Unit; n: number }[],
+  density: number,
+  length: Length,
+): any {
+  const chosen = selection.filter((s) => s.n >= 2);
+  const experience = chosen.filter((s) => s.unit.kind === "experience")
+    .sort((a, b) => (a.unit.sortKey < b.unit.sortKey ? 1 : -1))
+    .map((s) => ({
+      ...s.unit.head,
+      location: length === "onepage" ? "" : s.unit.head.location,
+      bullets: s.unit.bullets.slice(0, s.n).map((b) => b.text),
+    }));
+  const projects = chosen.filter((s) => s.unit.kind === "project")
+    .sort((a, b) => (a.unit.sortKey < b.unit.sortKey ? 1 : -1))
+    .map((s) => ({
+      name: s.unit.head.name, period: s.unit.head.period,
+      tech: length === "onepage" ? [] : s.unit.head.tech,
+      bullets: s.unit.bullets.slice(0, s.n).map((b) => b.text),
+    }));
+  let skills = frame.skills;
+  if (length === "onepage") skills = skills.slice(0, 4).map((g) => ({ group: g.group, items: g.items.slice(0, 8) }));
+  const education = frame.education.map((e) => ({ ...e, minors: length === "onepage" ? "" : e.minors }));
+  return {
+    meta: frame.meta, headline: frame.headline, summary: frame.summary,
+    education, experience, projects, skills, interests: frame.interests, density,
+  };
+}
+
 // One shrink step, matching build.py trim_once. Mutates `data`; returns false
 // when nothing else can go. Never trims an entry below two points.
 export function trimOnce(data: RenderData): boolean {

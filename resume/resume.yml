@@ -115,6 +115,7 @@ education:
 # -----------------------------------------------------------------------------
 experience:
   - id: ibm-phyp
+    weight: 10
     title: "Firmware Engineer Intern"
     org: "IBM"
     location: "Rochester, MN"
@@ -130,7 +131,7 @@ experience:
         tags: [sales]
         priority: 2
       # pipeline modernization + build-time win (same topic, per-target wording)
-      - text: "Modernized Jenkins/Groovy CI/CD pipelines for firmware and software builds on IBM's Power Hypervisor (PHYP), cutting build time 17% with smart Git prefetching and by eliminating redundant double-fetching."
+      - text: "Cut PHYP firmware/software build times 17% by reworking Jenkins/Groovy CI/CD pipelines with smart Git prefetching and by eliminating redundant double-fetches."
         tags: [sre]
         priority: 1
       - text: "Re-engineered PHYP firmware and software build pipelines (Jenkins, Groovy, Python, Perl, Bash), improving build time 17% through smart Git prefetching and de-duplicated fetches."
@@ -178,6 +179,7 @@ experience:
         priority: 2
 
   - id: isu-sysadmin
+    weight: 9
     title: "System Administrator"
     org: "Iowa State University"
     location: "Ames, IA"
@@ -217,6 +219,7 @@ experience:
         priority: 3
 
   - id: deere-cloudsec
+    weight: 9
     title: "Cloud Security Engineer"
     org: "John Deere"
     location: "Johnston, IA"
@@ -231,7 +234,7 @@ experience:
       - text: "Built tooling that verified 100,000+ AWS and Azure resources against policy and NIST standards, coordinating across security, cloud, and development stakeholders."
         tags: [sales]
         priority: 2
-      - text: "Built and deployed tooling that verified 100,000+ AWS and Azure resources against company policy, NIST standards, and platform best practices."
+      - text: "Built tooling that continuously audited 100,000+ AWS and Azure resources against company policy, NIST standards, and platform best practices."
         tags: [cloud, sre]
         priority: 1
       - text: "Wrote automated remediation for common misconfigurations flagged across the cloud estate."
@@ -248,6 +251,7 @@ experience:
         priority: 2
 
   - id: isu-research-compilers
+    weight: 8
     title: "Research Assistant - Compiler Optimization"
     org: "Iowa State University"
     location: "Ames, IA"
@@ -272,6 +276,7 @@ experience:
         priority: 3
 
   - id: isu-research-ml
+    weight: 7
     title: "Research Assistant - Machine Learning"
     org: "Iowa State University"
     location: "Ames, IA"
@@ -290,6 +295,7 @@ experience:
         priority: 2
 
   - id: cardinal-space-mining
+    weight: 5
     title: "Head of Networking"
     org: "Cardinal Space Mining"
     location: "Ames, IA"
@@ -314,6 +320,7 @@ experience:
         priority: 3
 
   - id: cyclone-rocketry
+    weight: 5
     title: "Lead Telemetry Engineer"
     org: "Cyclone Rocketry"
     location: "Ames, IA"
@@ -332,6 +339,7 @@ experience:
         priority: 2
 
   - id: bethel-research
+    weight: 6
     title: "Research Assistant - High Performance Computing"
     org: "Bethel University"
     location: "Saint Paul, MN"
@@ -353,6 +361,7 @@ experience:
         priority: 3
 
   - id: caribou-coffee
+    weight: 3
     title: "Manager"
     org: "Caribou Coffee"
     location: "White Bear Lake, MN"

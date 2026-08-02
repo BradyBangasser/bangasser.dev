@@ -19,7 +19,7 @@ import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
 import {
-  buildData, trimOnce, standaloneTyp, LENGTHS, TEMPLATES, TARGET_PAGES,
+  buildPool, assemble, standaloneTyp, LENGTHS, TEMPLATES, TARGET_PAGES,
 } from "../lib/resume-filter";
 
 const ROOT = process.cwd();
@@ -108,30 +108,49 @@ function main() {
     if (res.hasError()) { res.printErrors(); throw new Error("typst compile error"); }
     return res.result.numOfPages;
   };
-  const clone = (d: any) => JSON.parse(JSON.stringify(d));
-  // How few trims it takes to drop the last page before we consider that page
-  // "sparse" and collapse it into a full shorter résumé.
-  const COLLAPSE_MAX = 12;
 
-  // Fit `data` to `target` pages, filling the page: trim any overflow, then, if
-  // the last page is nearly empty, collapse it into a denser shorter résumé.
-  const fit = (data: any, tpl: string, target: number | null): { data: any; pages: number } => {
-    let pages = pagesFor(data, tpl);
-    if (target == null) return { data, pages };
-    for (let i = 0; i < 60 && pages > target && trimOnce(data); i++) pages = pagesFor(data, tpl);
+  // Density lever (multiplies leading + section/entry/bullet gaps in the
+  // template). Grounded in resume-typography research: keep line spacing near
+  // 1.0-1.15, so the band is narrow and mostly lives in the gaps.
+  const DENSITY: Record<string, number[]> = {
+    designed: [1.0, 1.08, 1.16, 1.25, 1.34],
+    ats: [1.0, 1.05, 1.1, 1.16],
+  };
+  const MAX_BULLETS = 6;
 
-    while (pages >= 2) {
-      const probe = clone(data);
-      let trims = 0, dropped = false;
-      for (let i = 0; i < 60; i++) {
-        if (!trimOnce(probe)) break;
-        trims++;
-        if (pagesFor(probe, tpl) < pages) { dropped = true; break; }
-      }
-      if (dropped && trims <= COLLAPSE_MAX) { data = probe; pages -= 1; }
-      else break;
+  // Weighted greedy pack + density fill. Take the strongest content by
+  // score (on-preset first, then borrowed) until the page is full, then open
+  // spacing within the band to fill the target exactly.
+  const pack = (preset: string, length: any, template: string, target: number | null): { data: any; pages: number } => {
+    const { frame, units } = buildPool(master, preset);
+    const sel = units.map((u) => ({ unit: u, n: 0 }));
+    const pagesAt = (d: number) => pagesFor(assemble(frame, sel, d, length), template);
+
+    if (target == null) {
+      for (const s of sel) s.n = s.unit.bullets.length;
+      return { data: assemble(frame, sel, 1.0, length), pages: pagesAt(1.0) };
     }
-    return { data, pages };
+
+    // Phase 1: admit each unit (score order) with its two best bullets if it fits.
+    for (const s of sel) {
+      s.n = Math.min(2, s.unit.bullets.length);
+      if (pagesAt(1.0) > target) s.n = 0;
+    }
+    // Phase 2: grow bullets on admitted units, score order, until the page is full.
+    for (const s of sel) {
+      if (s.n === 0) continue;
+      while (s.n < Math.min(s.unit.bullets.length, MAX_BULLETS)) {
+        s.n++;
+        if (pagesAt(1.0) > target) { s.n--; break; }
+      }
+    }
+    // Phase 3: fill by density — largest band step that stays within target.
+    let bestD = 1.0;
+    for (const d of DENSITY[template]) {
+      if (d <= 1.0) continue;
+      if (pagesAt(d) <= target) bestD = d; else break;
+    }
+    return { data: assemble(frame, sel, bestD, length), pages: pagesAt(bestD) };
   };
 
   const manifest: any = {
@@ -146,9 +165,11 @@ function main() {
   for (const preset of presets) {
     for (const length of LENGTHS) {
       for (const template of TEMPLATES) {
-        const built = buildData(master, preset, length);
         const target = TARGET_PAGES[length];
-        const { data, pages } = fit(built, template, target);
+        let { data, pages } = pack(preset, length, template, target);
+        // If a two-pager can't honestly fill two pages even stretched, make it
+        // a full one-pager instead of a sparse second page.
+        if (target === 2 && pages < 2) ({ data, pages } = pack(preset, length, template, 1));
         const key = `${preset}-${length}-${template}`;
         fs.writeFileSync(dataPath, JSON.stringify(data));
         c.evictCache(0);

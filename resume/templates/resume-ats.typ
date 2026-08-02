@@ -3,6 +3,7 @@
 // so parsers have the cleanest possible signal. Bullets never split a page.
 #let data = json("/build/data.json")
 #let m = data.meta
+#let D = data.at("density", default: 1.0)   // spacing lever set by the fitter
 
 #let ink  = rgb("#000000")
 #let sub  = rgb("#333333")
@@ -11,12 +12,12 @@
 #set document(title: m.name + " Resume", author: m.name)
 #set page(paper: "us-letter", margin: (x: 0.7in, top: 0.55in, bottom: 0.55in))
 #set text(font: "Libertinus Serif", size: 10.5pt, fill: ink)
-#set par(leading: 0.55em, justify: false)
+#set par(leading: (0.55em * D), justify: false)
 
-#let SEC_ABOVE = 10pt
-#let SEC_BELOW = 5pt
-#let ENTRY_GAP = 8pt
-#let BULLET_ABOVE = 3pt
+#let SEC_ABOVE = (10pt * D)
+#let SEC_BELOW = (5pt * D)
+#let ENTRY_GAP = (8pt * D)
+#let BULLET_ABOVE = (3pt * D)
 
 #let point(it) = block(breakable: false, above: BULLET_ABOVE, below: 0pt)[
   #grid(columns: (0.85em, 1fr), column-gutter: 4pt, [•], [#it])

@@ -8,6 +8,7 @@
 // template compiles identically locally and in the browser.
 #let data = json("/build/data.json")
 #let m = data.meta
+#let D = data.at("density", default: 1.0)   // spacing lever set by the fitter
 
 #let ink    = rgb("#15181c")   // near-black body
 #let accent = rgb("#1f4e79")   // one muted professional blue
@@ -17,13 +18,13 @@
 #set document(title: m.name + " Resume", author: m.name)
 #set page(paper: "us-letter", margin: (x: 0.65in, top: 0.5in, bottom: 0.5in))
 #set text(font: "Libertinus Serif", size: 10.5pt, fill: ink)
-#set par(leading: 0.55em, justify: false)   // ~1.13 line spacing
+#set par(leading: (0.55em * D), justify: false)   // ~1.13 line spacing
 
 // ---- rhythm ---------------------------------------------------------------
-#let SEC_ABOVE = 10pt
-#let SEC_BELOW = 5pt
-#let ENTRY_GAP = 8pt
-#let BULLET_ABOVE = 3pt
+#let SEC_ABOVE = (10pt * D)
+#let SEC_BELOW = (5pt * D)
+#let ENTRY_GAP = (8pt * D)
+#let BULLET_ABOVE = (3pt * D)
 
 #let point(it) = block(breakable: false, above: BULLET_ABOVE, below: 0pt)[
   #grid(columns: (0.85em, 1fr), column-gutter: 4pt, text(fill: sub)[•], [#it])
