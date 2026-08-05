@@ -21,7 +21,7 @@ value, the more recently pushed one wins and the build prints a warning.
 | --- | --- |
 | Hide a repo | Add an empty `.nosite` file to the repo root. |
 | Show a repo you do not own | Add `owner/name` to `.include_repo.txt` in the `bangasser.dev` repo, one per line. |
-| Rename or re-describe | Add `content/projects/<slug>.mdx` (see Overrides). |
+| Rename or re-describe | Add YAML frontmatter to the repo `README.md` (see Metadata). |
 | Mark it inactive | Nothing to do: "active" is derived from the last push date (`ACTIVE_DAYS`, default 60, in `scripts/fetch_github.py`). |
 
 ## Per-repo files that are read
@@ -33,28 +33,17 @@ calls. Only the docs tree uses one API call, and only when `docs/` exists.
 | --- | --- |
 | `README.md` | The project overview. Relative links and images are rewritten to absolute GitHub URLs so they resolve off-site. Required. |
 | `docs/` | A full ReadTheDocs-style docs site at `/projects/<slug>/docs`. See Operations > The docs system. |
-| `blog/index.txt` + `blog/*.md` | Repo articles. See Writing. |
+| `blog/*.md` | Repo articles, autoscanned (no manifest). See Writing. |
 | `.resume.yml` | A resume entry for that project. See Resume. |
 | `.related.txt` | Related repo slugs, one per line, shown as a related-projects list. |
 
-## Overrides and narration
+## Metadata via README frontmatter
 
-The README is the default content. To change the title, summary, tags, or add
-prose that sits above the README, create `content/projects/<slug>.mdx`:
+The README body is the overview. To set the title, summary, tags, featured flag,
+or SLO/SLA, add YAML frontmatter to the top of the README. See
+**Files a repo can add** for the full field list. There are no per-project
+override files in the website repo.
 
-```mdx
----
-title: "Erid: Unified Cloud Images"
-summary: "One Packer pipeline, identical images across five clouds and on-prem."
-tags: [cloud, sre, reliability]
-featured: true
----
-
-Narration in Markdown appears before the README on the project page.
-```
-
-Frontmatter fields are all optional; anything you omit falls back to the repo
-(name, description, topics).
 
 ## The live status line
 

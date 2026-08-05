@@ -76,17 +76,18 @@ def _doc_title(content, rel):
     return base.replace("-", " ").replace("_", " ").title()
 
 
-def fetch_docs_tree(owner, name, branch):
-    """Full docs/ tree (nested .md) via the git trees API, content over raw."""
+def fetch_tree(owner, name, branch):
+    """One recursive git-trees call, reused for docs and blog discovery."""
     tree = api_get(f"https://api.github.com/repos/{owner}/{name}/git/trees/{branch}?recursive=1")
-    if not tree or "tree" not in tree:
-        return []
+    return tree.get("tree", []) if tree and "tree" in tree else []
+
+
+def docs_from_tree(tree, owner, name, branch):
+    """Full docs/ tree (nested .md), content over raw."""
     out = []
-    for node in tree["tree"]:
+    for node in tree:
         path = node.get("path", "")
-        if node.get("type") != "blob":
-            continue
-        if not path.startswith("docs/") or not path.lower().endswith(".md"):
+        if node.get("type") != "blob" or not path.startswith("docs/") or not path.lower().endswith(".md"):
             continue
         content = raw_get(owner, name, branch, path)
         if content is None:
@@ -94,12 +95,39 @@ def fetch_docs_tree(owner, name, branch):
         content = absolutize_readme(content, owner, name, branch)
         rel = path[len("docs/"):]
         out.append({"path": rel, "title": _doc_title(content, rel), "content": content})
-    # index/readme first within a folder, then alphabetical; shallower dirs first
+
     def key(d):
         parts = d["path"].split("/")
         base = parts[-1].lower()
         return (len(parts), "/".join(parts[:-1]), 0 if base in ("readme.md", "index.md") else 1, base)
     out.sort(key=key)
+    return out
+
+
+def blog_from_tree(tree, owner, name, branch, r):
+    """Autoscan blog/*.md (top level), newest first. No manifest needed."""
+    out = []
+    for node in tree:
+        path = node.get("path", "")
+        if node.get("type") != "blob" or not path.startswith("blog/") or not path.lower().endswith(".md"):
+            continue
+        base = path[len("blog/"):]
+        if "/" in base or base.lower() in ("readme.md", "index.md"):
+            continue
+        body = raw_get(owner, name, branch, path)
+        if body is None:
+            continue
+        meta, md = parse_frontmatter(body)
+        pslug = slugify(re.sub(r"\.md$", "", base))
+        out.append({
+            "slug": pslug,
+            "title": meta.get("title") or pslug.replace("-", " ").title(),
+            "date": meta.get("date") or pushed_from_repo(r),
+            "summary": meta.get("summary", ""),
+            "tags": meta.get("tags", []),
+            "content": absolutize_readme(md, owner, name, branch),
+        })
+    out.sort(key=lambda p: str(p["date"]), reverse=True)
     return out
 
 
@@ -171,10 +199,14 @@ def build_project(r):
 
     if raw_exists(owner, name, branch, OPT_OUT_FILE):
         return None  # explicit opt-out
-    readme = raw_get(owner, name, branch, "README.md") or raw_get(owner, name, branch, "readme.md")
-    if readme is None:
+    readme_raw = raw_get(owner, name, branch, "README.md") or raw_get(owner, name, branch, "readme.md")
+    if readme_raw is None:
         return None  # a project needs an overview
-    readme = absolutize_readme(readme, owner, name, branch)
+    # A repo's README may carry optional YAML frontmatter (title, summary, tags,
+    # featured, slo, sla). The body below it is the project overview. This
+    # replaces per-project override files in the website repo.
+    rmeta, readme_body = parse_frontmatter(readme_raw)
+    readme = absolutize_readme(readme_body, owner, name, branch)
 
     related_txt = raw_get(owner, name, branch, ".related.txt")
     related = ([l.strip() for l in related_txt.splitlines()
@@ -182,31 +214,12 @@ def build_project(r):
     resume_yml = raw_get(owner, name, branch, ".resume.yml")
     has_resume = resume_yml is not None
 
-    # docs/: pull the full nested tree; rendered as a ReadTheDocs-style docs site
-    has_index = raw_exists(owner, name, branch, "docs/README.md") or raw_exists(owner, name, branch, "docs/index.md")
-    docs = fetch_docs_tree(owner, name, branch) if has_index else []
+    # One tree call, reused for the docs site and the autoscanned blog.
+    tree = fetch_tree(owner, name, branch)
+    docs = docs_from_tree(tree, owner, name, branch)
     has_docs = len(docs) > 0
     docs_url = f"https://github.com/{owner}/{name}/tree/{branch}/docs" if has_docs else None
-
-    # blog/: posts are listed in blog/index.txt (one .md filename per line), so
-    # ingestion stays raw-only (no directory-listing API call).
-    posts = []
-    index = raw_get(owner, name, branch, "blog/index.txt")
-    if index:
-        for fn in [l.strip() for l in index.splitlines() if l.strip() and not l.startswith("#")]:
-            body = raw_get(owner, name, branch, f"blog/{fn}")
-            if body is None:
-                continue
-            meta, md = parse_frontmatter(body)
-            pslug = slugify(re.sub(r"\.md$", "", fn))
-            posts.append({
-                "slug": pslug,
-                "title": meta.get("title") or pslug.replace("-", " ").title(),
-                "date": meta.get("date") or pushed_from_repo(r),
-                "summary": meta.get("summary", ""),
-                "tags": meta.get("tags", []),
-                "content": absolutize_readme(md, owner, name, branch),
-            })
+    posts = blog_from_tree(tree, owner, name, branch, r)
     has_blog = len(posts) > 0
 
     pushed = r.get("pushed_at") or ""
@@ -223,6 +236,11 @@ def build_project(r):
         "homepage": r.get("homepage"), "language": r.get("language"),
         "stars": r.get("stargazers_count", 0), "openIssues": r.get("open_issues_count", 0),
         "topics": r.get("topics", []), "pushedAt": pushed, "active": active,
+        "title": rmeta.get("title") or name,
+        "summary": rmeta.get("summary") or r.get("description") or "",
+        "projTags": rmeta.get("tags") or r.get("topics", []),
+        "featured": bool(rmeta.get("featured", False)),
+        "slo": rmeta.get("slo"), "sla": rmeta.get("sla"),
         "defaultBranch": branch,
         "hasResumeYml": has_resume, "resumeYml": resume_yml,
         "related": related, "readme": readme,

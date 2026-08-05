@@ -72,6 +72,22 @@ export default async function ProjectPage({
             <h1 className="text-3xl font-semibold sm:text-4xl">{project.title}</h1>
             <p className="mt-3 text-ink-muted">{project.summary}</p>
 
+            {(project.slo || project.sla) && (
+              <div className="mt-4 flex flex-wrap gap-2">
+                {project.slo && (
+                  <span className="inline-flex items-center gap-1.5 rounded-lg border border-cyan/30 bg-cyan/5 px-3 py-1.5 font-mono text-xs text-cyan">
+                    <span className="status-dot status-dot--active" aria-hidden="true" />
+                    SLO {project.slo}
+                  </span>
+                )}
+                {project.sla && (
+                  <span className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-bg-elevated px-3 py-1.5 font-mono text-xs text-ink-muted">
+                    SLA {project.sla}
+                  </span>
+                )}
+              </div>
+            )}
+
             <div className="mt-5 flex flex-wrap gap-2.5">
               {project.repo && (
                 <a

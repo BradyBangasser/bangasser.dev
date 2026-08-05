@@ -5,7 +5,6 @@ import readingTime from "reading-time";
 
 const CONTENT_DIR = path.join(process.cwd(), "content");
 const BLOG_DIR = path.join(CONTENT_DIR, "blog");
-const PROJECTS_DIR = path.join(CONTENT_DIR, "projects");
 
 export type PostType = "short" | "long";
 
@@ -57,6 +56,8 @@ export interface Project extends ProjectFrontmatter {
   related?: string[];
   external?: boolean;
   pushedAt?: string;
+  slo?: string | null;
+  sla?: string | null;
   docs?: DocFile[];
   docsUrl?: string | null;
   posts?: RepoBlogPost[];
@@ -141,6 +142,12 @@ export interface GeneratedProject {
   stars: number;
   openIssues: number;
   topics: string[];
+  title?: string;
+  summary?: string;
+  projTags?: string[];
+  featured?: boolean;
+  slo?: string | null;
+  sla?: string | null;
   pushedAt: string;
   active: boolean;
   defaultBranch: string;
@@ -228,32 +235,22 @@ export function getGeneratedProjects(): GeneratedProject[] {
 // content/projects/{slug}.md, if present, overrides frontmatter fields and
 // supplies narration; otherwise the README is the project's main content.
 function mergeProject(g: GeneratedProject): Project {
-  let fm: Partial<ProjectFrontmatter> = {};
-  let narration = "";
-  try {
-    if (
-      fs.existsSync(path.join(PROJECTS_DIR, `${g.slug}.md`)) ||
-      fs.existsSync(path.join(PROJECTS_DIR, `${g.slug}.mdx`))
-    ) {
-      const { data, content } = readOne<ProjectFrontmatter>(PROJECTS_DIR, g.slug);
-      fm = data;
-      narration = content;
-    }
-  } catch {
-    /* no curated file */
-  }
+  // Fully repo-driven: title/summary/tags/slo/sla come from optional README
+  // frontmatter (falling back to repo metadata), and the overview is the README
+  // body. There is no per-project override file in this repo.
   return {
     slug: g.slug,
-    title: fm.title ?? g.name,
-    summary: fm.summary ?? g.description ?? "",
-    tags: fm.tags ?? g.topics ?? [],
-    status: fm.status ?? (g.active ? "active" : "archived"),
+    title: g.title ?? g.name,
+    summary: g.summary ?? g.description ?? "",
+    tags: g.projTags ?? g.topics ?? [],
+    status: g.active ? "active" : "archived",
     date: g.pushedAt,
     repo: g.fullName,
-    externalUrl: fm.externalUrl ?? g.homepage ?? undefined,
-    featured: fm.featured,
-    draft: fm.draft,
-    content: narration || g.readme || "",
+    externalUrl: g.homepage ?? undefined,
+    featured: g.featured,
+    slo: g.slo ?? null,
+    sla: g.sla ?? null,
+    content: g.readme || "",
     url: g.url,
     language: g.language,
     stars: g.stars,

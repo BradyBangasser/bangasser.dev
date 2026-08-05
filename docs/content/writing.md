@@ -27,14 +27,8 @@ Body in Markdown or MDX.
 
 ## Repo articles
 
-Writing that belongs to a project lives in that repo. Add a `blog/index.txt`
-listing the post files, one filename per line, then the files:
-
-```
-# blog/index.txt
-golden-images.md
-killing-drift.md
-```
+Writing that belongs to a project lives in that repo. Drop Markdown files in
+`blog/` and they are autoscanned, newest first. No manifest is needed:
 
 ```md
 ---
@@ -47,8 +41,7 @@ tags: [cloud]
 Body.
 ```
 
-- Without `blog/index.txt` the folder is not scanned (this keeps ingestion
-  API-free).
+- Top-level `blog/*.md` are posts; `blog/README.md` and `blog/index.md` are ignored.
 - Served at `/blog/<project-slug>/content/<slug>`.
 
 ## Where writing surfaces
