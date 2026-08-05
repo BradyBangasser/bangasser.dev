@@ -64,6 +64,45 @@ def raw_exists(owner, repo, branch, path):
     return raw_get(owner, repo, branch, path) is not None
 
 
+def _doc_title(content, rel):
+    for line in content.splitlines():
+        t = line.strip()
+        if t.startswith("# "):
+            return t[2:].strip()
+    base = rel.rsplit("/", 1)[-1].rsplit(".", 1)[0]
+    if base.lower() in ("readme", "index"):
+        parent = rel.rsplit("/", 2)[-2] if "/" in rel else ""
+        return parent.replace("-", " ").replace("_", " ").title() if parent else "Overview"
+    return base.replace("-", " ").replace("_", " ").title()
+
+
+def fetch_docs_tree(owner, name, branch):
+    """Full docs/ tree (nested .md) via the git trees API, content over raw."""
+    tree = api_get(f"https://api.github.com/repos/{owner}/{name}/git/trees/{branch}?recursive=1")
+    if not tree or "tree" not in tree:
+        return []
+    out = []
+    for node in tree["tree"]:
+        path = node.get("path", "")
+        if node.get("type") != "blob":
+            continue
+        if not path.startswith("docs/") or not path.lower().endswith(".md"):
+            continue
+        content = raw_get(owner, name, branch, path)
+        if content is None:
+            continue
+        content = absolutize_readme(content, owner, name, branch)
+        rel = path[len("docs/"):]
+        out.append({"path": rel, "title": _doc_title(content, rel), "content": content})
+    # index/readme first within a folder, then alphabetical; shallower dirs first
+    def key(d):
+        parts = d["path"].split("/")
+        base = parts[-1].lower()
+        return (len(parts), "/".join(parts[:-1]), 0 if base in ("readme.md", "index.md") else 1, base)
+    out.sort(key=key)
+    return out
+
+
 def slugify(name):
     return re.sub(r"^-+|-+$", "", re.sub(r"[^a-z0-9]+", "-", name.lower()))
 
@@ -143,11 +182,10 @@ def build_project(r):
     resume_yml = raw_get(owner, name, branch, ".resume.yml")
     has_resume = resume_yml is not None
 
-    # docs/: render docs/README.md (or index.md) as a documentation section
-    docs_readme = raw_get(owner, name, branch, "docs/README.md") or raw_get(owner, name, branch, "docs/index.md")
-    has_docs = docs_readme is not None
-    if docs_readme:
-        docs_readme = absolutize_readme(docs_readme, owner, name, branch)
+    # docs/: pull the full nested tree; rendered as a ReadTheDocs-style docs site
+    has_index = raw_exists(owner, name, branch, "docs/README.md") or raw_exists(owner, name, branch, "docs/index.md")
+    docs = fetch_docs_tree(owner, name, branch) if has_index else []
+    has_docs = len(docs) > 0
     docs_url = f"https://github.com/{owner}/{name}/tree/{branch}/docs" if has_docs else None
 
     # blog/: posts are listed in blog/index.txt (one .md filename per line), so
@@ -188,7 +226,7 @@ def build_project(r):
         "defaultBranch": branch,
         "hasResumeYml": has_resume, "resumeYml": resume_yml,
         "related": related, "readme": readme,
-        "hasDocs": has_docs, "docsReadme": docs_readme, "docsUrl": docs_url,
+        "hasDocs": has_docs, "docs": docs, "docsUrl": docs_url,
         "hasBlog": has_blog, "posts": posts,
         "external": owner.lower() != USERNAME.lower(),
     }

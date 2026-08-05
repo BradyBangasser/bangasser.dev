@@ -193,6 +193,18 @@ experience:
       - text: "Support and troubleshoot researchers' applications, improving accessibility and onboarding with OpenOnDemand."
         tags: [sales]
         priority: 2
+      - text: "Judged three posters at PEARC26; studied hybrid Slurm/Kubernetes scheduling and compute efficiency."
+        tags: [sre]
+        priority: 1
+      - text: "Judged three posters at PEARC26; weighed Slurm/Kubernetes, federated compute, and cloud ML tradeoffs."
+        tags: [cloud]
+        priority: 1
+      - text: "Judged three posters at PEARC26; studied Slurm-on-Kubernetes (Slinky) and shared-node scheduling."
+        tags: [hpc, compilers]
+        priority: 1
+      - text: "Judged three student posters at PEARC26 on HPC scheduling and research computing."
+        tags: [software, sales]
+        priority: 1
       - text: "Operate and maintain a production HPC cluster with SLURM, Kubernetes, Active Directory, Ansible, Prometheus, and Apptainer, keeping it secure and available for a large user base."
         tags: [sre, cloud, hpc]
         priority: 1

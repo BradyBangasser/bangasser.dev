@@ -1,0 +1,66 @@
+---
+title: "PEARC26: what a poster judge learns about running research computing"
+date: "2026-07-25"
+summary: "Notes from PEARC26 in Minneapolis on judging student work, hybrid Slurm and Kubernetes scheduling, and a login-node idea I want to build."
+tags: ["hpc", "kubernetes", "reliability", "research-computing"]
+type: "long"
+---
+
+I spent a week in Minneapolis at PEARC26 with the rest of the Iowa State
+Research IT and HPC team. PEARC is where the people who actually operate
+national research computing compare notes, and going as an operator rather
+than a spectator changed what I paid attention to.
+
+## Judging taught me more than attending
+
+I served as a student poster judge and evaluated three submissions on technical
+merit, reproducibility, and clarity. The gap between a good poster and a great
+one was not the idea. It was evidence. The strongest work came with a live demo,
+and watching someone drive a real system under questions tells you far more than
+a results table does. A couple of the demos ran on HTCondor, which I have read
+about but not operated, and seeing it work in front of me moved it from a name
+to a mental model.
+
+Judging is a useful exercise for an operator. You are forced to separate what a
+system claims from what it demonstrates, which is the same discipline that
+separates a green dashboard from an actually healthy service.
+
+## The threads I kept pulling on
+
+A few themes ran through the sessions and lined up with what I think about at
+work:
+
+- **National cyberinfrastructure and federated compute.** The interesting
+  reliability problem is not a single cluster, it is the dependencies that span
+  sites. Federation buys capacity and buys you new failure modes at the same time.
+- **Cloud based ML and AI training.** The demand is real, and so is the tension
+  between the persistent, high throughput environment training wants and the
+  batch scheduling model most HPC runs on.
+- **Resource efficiency.** Utilization is a reliability concern, not just a cost
+  one. Idle capacity and contention are two sides of the same scheduling problem.
+
+## Where I want to take this
+
+The idea I left with is a hybrid: run Slurm and Kubernetes on the same nodes so
+a cluster can serve both batch analytics and persistent, container-native
+workloads without maintaining two separate fabrics. Slinky, which runs Slurm
+inside Kubernetes so the two schedulers can share resources, is the piece that
+makes this plausible. Pair that with a high throughput fabric like OSPool for
+opportunistic capacity, and an AI researcher gets both the analytic power of a
+system like Nova and somewhere to burst.
+
+The smaller, more concrete thing I am prototyping is high availability login
+nodes on k3s. Login nodes are usually a single point of failure that nobody
+treats like production. The sketch: give each user an isolated pod with a
+burstable slice of CPU, so one person cannot starve the login node for everyone
+else, migrate a session off a node that is degrading before it fails, and give
+browser based VS Code sessions a clean lifecycle that gets torn down when the
+user leaves. It is early, and I will write it up properly once it runs.
+
+## What changed
+
+The through line from all of it is that research computing is quietly becoming a
+platform engineering problem. The researchers do not want to think about
+schedulers or nodes, they want a reliable place to do their work, and the job of
+the people operating these systems is to make the hard parts invisible. That is
+the part I want to keep building toward.

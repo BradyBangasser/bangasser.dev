@@ -6,7 +6,7 @@
 export const siteConfig = {
   // Feature flags. Flip a section off site-wide without touching components.
   features: {
-    consulting: true, // shows the Consulting page, nav link, and a low-key home mention
+    consulting: false, // shows the Consulting page, nav link, and a low-key home mention
   },
 
   name: "Brady Bangasser",

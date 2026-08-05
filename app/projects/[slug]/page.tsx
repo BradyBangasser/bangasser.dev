@@ -42,7 +42,7 @@ export default async function ProjectPage({
   if (!project) notFound();
 
   const content = await renderMarkdown(project.content);
-  const docs = project.docsReadme ? await renderMarkdown(project.docsReadme) : null;
+  const hasDocs = (project.docs?.length ?? 0) > 0;
 
   return (
     <article className="mx-auto max-w-page px-6 py-14 sm:py-20">
@@ -107,18 +107,20 @@ export default async function ProjectPage({
         dangerouslySetInnerHTML={{ __html: content }}
       />
 
-      {docs && (
-        <section className="mt-16 max-w-prose">
-          <div className="mb-4 flex items-baseline justify-between">
-            <h2 className="text-xl font-semibold">Documentation</h2>
-            {project.docsUrl && (
-              <a href={project.docsUrl} target="_blank" rel="noopener noreferrer"
-                className="font-mono text-xs text-accent no-underline hover:underline">
-                full docs ↗
-              </a>
-            )}
-          </div>
-          <div className="prose prose-invert max-w-prose" dangerouslySetInnerHTML={{ __html: docs }} />
+      {hasDocs && (
+        <section className="mt-12 max-w-prose">
+          <Link
+            href={`/projects/${project.slug}/docs`}
+            className="group flex items-center justify-between rounded-xl border border-border bg-bg-elevated px-5 py-4 no-underline transition-colors hover:border-accent/40"
+          >
+            <span>
+              <span className="block font-medium text-ink group-hover:text-accent">Documentation</span>
+              <span className="block text-sm text-ink-muted">
+                {project.docs!.length} page{project.docs!.length === 1 ? "" : "s"}, browsable with search
+              </span>
+            </span>
+            <span className="font-mono text-sm text-ink-faint group-hover:text-accent">open docs →</span>
+          </Link>
         </section>
       )}
 

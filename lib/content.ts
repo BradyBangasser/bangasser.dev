@@ -55,7 +55,7 @@ export interface Project extends ProjectFrontmatter {
   related?: string[];
   external?: boolean;
   pushedAt?: string;
-  docsReadme?: string | null;
+  docs?: DocFile[];
   docsUrl?: string | null;
   posts?: RepoBlogPost[];
 }
@@ -143,7 +143,7 @@ export interface GeneratedProject {
   active: boolean;
   defaultBranch: string;
   hasDocs: boolean;
-  docsReadme: string | null;
+  docs: DocFile[];
   docsUrl: string | null;
   hasBlog: boolean;
   posts: RepoBlogPost[];
@@ -152,6 +152,64 @@ export interface GeneratedProject {
   related: string[];
   readme: string | null;
   external: boolean;
+}
+
+export interface DocFile {
+  path: string;    // relative to docs/, e.g. "guides/setup.md"
+  title: string;
+  content: string; // markdown (links already absolutized to GitHub)
+}
+
+export interface DocNavNode {
+  title: string;
+  urlPath?: string;      // route segment under /projects/{slug}/docs, "" = index
+  children: DocNavNode[];
+}
+
+// "guides/setup.md" -> "guides/setup"; a folder index -> the folder path; root index -> ""
+export function docToUrlPath(filePath: string): string {
+  const noExt = filePath.replace(/\.md$/i, "");
+  const parts = noExt.split("/");
+  const base = parts[parts.length - 1].toLowerCase();
+  if (base === "readme" || base === "index") parts.pop();
+  return parts.join("/");
+}
+
+function folderTitle(folder: string): string {
+  return folder.replace(/[-_]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+export function getProjectDocs(slug: string): DocFile[] {
+  return getGeneratedProjects().find((g) => g.slug === slug)?.docs ?? [];
+}
+
+// Resolve a url path (e.g. "guides/setup" or "" for index) to a doc file.
+export function resolveDoc(docs: DocFile[], urlPath: string): DocFile | null {
+  const want = urlPath.replace(/\/+$/, "");
+  return docs.find((d) => docToUrlPath(d.path) === want) ?? null;
+}
+
+// Nested nav tree built from the flat doc list, for the sidebar.
+export function buildDocsNav(docs: DocFile[]): DocNavNode[] {
+  const root: DocNavNode & { folder?: string; named?: boolean } = { title: "", children: [] };
+  const find = (node: any, folder: string) => {
+    let c = node.children.find((x: any) => x.folder === folder);
+    if (!c) { c = { title: folderTitle(folder), folder, children: [], named: false }; node.children.push(c); }
+    return c;
+  };
+  for (const d of docs) {
+    const parts = d.path.split("/");
+    let node: any = root;
+    for (let i = 0; i < parts.length - 1; i++) node = find(node, parts[i]);
+    const base = parts[parts.length - 1].toLowerCase();
+    if (base === "readme.md" || base === "index.md") {
+      node.urlPath = docToUrlPath(d.path);
+      if (node !== root && !node.named) { node.title = d.title; node.named = true; }
+    } else {
+      node.children.push({ title: d.title, urlPath: docToUrlPath(d.path), children: [] });
+    }
+  }
+  return root.children;
 }
 
 export function getGeneratedProjects(): GeneratedProject[] {
@@ -205,7 +263,7 @@ function mergeProject(g: GeneratedProject): Project {
     related: g.related,
     external: g.external,
     pushedAt: g.pushedAt,
-    docsReadme: g.docsReadme,
+    docs: g.docs ?? [],
     docsUrl: g.docsUrl,
     posts: g.posts ?? [],
   };
