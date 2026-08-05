@@ -127,7 +127,13 @@ function main() {
     const pagesAt = (d: number) => pagesFor(assemble(frame, sel, d, length), template);
 
     if (target == null) {
-      for (const s of sel) s.n = s.unit.bullets.length;
+      // "full" = every on-preset bullet (comprehensive for the role) rather than
+      // literally all bullets, so off-preset, per-preset variants of the same
+      // point (e.g. the tailored conference lines) do not stack up.
+      for (const s of sel) {
+        const onPreset = s.unit.bullets.filter((b) => b.onPreset).length;
+        s.n = Math.min(s.unit.bullets.length, Math.max(2, onPreset));
+      }
       return { data: assemble(frame, sel, 1.0, length), pages: pagesAt(1.0) };
     }
 

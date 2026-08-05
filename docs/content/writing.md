@@ -1,11 +1,60 @@
 # Writing
 
-Two kinds of articles share the `/blog` feed:
+Two kinds of articles share one feed at `/blog`, sorted newest first.
 
-- **Site posts:** `content/blog/<slug>.mdx`, served at `/blog/<slug>`.
-- **Repo articles:** files listed in a repo `blog/index.txt`, served at
-  `/blog/<project-slug>/content/<slug>`.
+## Site posts
 
-The latest article from each project also appears in the home "In the pipeline"
-carousel. Repo article files use frontmatter (`title`, `date`, `summary`,
-`tags`) then a Markdown body.
+Personal essays and notes that are not tied to a single repo. Create
+`content/blog/<slug>.mdx`:
+
+```mdx
+---
+title: "Notes on job scheduling in HPC clusters"
+date: "2026-06-15"
+summary: "How scheduling policy shapes throughput and fairness on shared clusters."
+tags: ["hpc", "distributed-systems"]
+type: "long"
+---
+
+## A heading
+
+Body in Markdown or MDX.
+```
+
+- `type` is `"long"` (a deep dive) or `"short"` (a note). It only affects the
+  label shown on the card.
+- Served at `/blog/<slug>`.
+
+## Repo articles
+
+Writing that belongs to a project lives in that repo. Add a `blog/index.txt`
+listing the post files, one filename per line, then the files:
+
+```
+# blog/index.txt
+golden-images.md
+killing-drift.md
+```
+
+```md
+---
+title: "Building reproducible golden images"
+date: 2026-07-18
+summary: "One Packer pipeline, identical images across five clouds."
+tags: [cloud]
+---
+
+Body.
+```
+
+- Without `blog/index.txt` the folder is not scanned (this keeps ingestion
+  API-free).
+- Served at `/blog/<project-slug>/content/<slug>`.
+
+## Where writing surfaces
+
+- The unified `/blog` feed shows both kinds, with repo articles labeled "from
+  <project>".
+- The latest article from each project appears in the home "In the pipeline"
+  carousel.
+- Everything is indexed for site search.

@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { getAllPosts, getPostBySlug } from "@/lib/content";
 import { renderMDX } from "@/lib/mdx";
 import { siteConfig } from "@/lib/site-config";
+import { publicFileExists } from "@/lib/photo";
 
 export async function generateStaticParams() {
   return getAllPosts().map((p) => ({ slug: p.slug }));
@@ -91,6 +93,19 @@ export default async function BlogPostPage({
           </div>
         )}
       </header>
+
+      {post.coverImage && publicFileExists(post.coverImage) && (
+        <figure className="relative mt-8 aspect-[16/9] max-w-prose overflow-hidden rounded-xl border border-border bg-bg-elevated">
+          <Image
+            src={post.coverImage}
+            alt={post.coverAlt ?? post.title}
+            fill
+            sizes="(max-width: 768px) 100vw, 720px"
+            className="object-cover"
+            priority
+          />
+        </figure>
+      )}
 
       <div className="prose prose-invert mt-10 max-w-prose">{content}</div>
     </article>

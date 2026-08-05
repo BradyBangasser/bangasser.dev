@@ -4,6 +4,8 @@ date: "2026-07-25"
 summary: "Notes from PEARC26 in Minneapolis on judging student work, hybrid Slurm and Kubernetes scheduling, and a login-node idea I want to build."
 tags: ["hpc", "kubernetes", "reliability", "research-computing"]
 type: "long"
+coverImage: "/photos/pearc26.jpg"
+coverAlt: "The Iowa State Research IT team at PEARC26 in Minneapolis"
 ---
 
 I spent a week in Minneapolis at PEARC26 with the rest of the Iowa State
@@ -51,11 +53,30 @@ system like Nova and somewhere to burst.
 
 The smaller, more concrete thing I am prototyping is high availability login
 nodes on k3s. Login nodes are usually a single point of failure that nobody
-treats like production. The sketch: give each user an isolated pod with a
-burstable slice of CPU, so one person cannot starve the login node for everyone
-else, migrate a session off a node that is degrading before it fails, and give
-browser based VS Code sessions a clean lifecycle that gets torn down when the
-user leaves. It is early, and I will write it up properly once it runs.
+treats like production: everyone lands on the same shared host, one runaway
+process degrades it for the whole cluster, and if it falls over, sessions die
+with it. Here is the sketch I am working from.
+
+- **Isolation per user.** On login, each user gets their own pod rather than a
+  shared shell. A compromised or misbehaving session is contained instead of
+  sitting next to everyone else's.
+- **Fairness with cgroups.** Each pod gets a burstable slice of CPU, a floor it
+  can always use and a ceiling it can borrow toward when the node is idle. One
+  person compiling aggressively can no longer starve the node for everyone else,
+  which is the failure I see most often on a shared login host.
+- **Session migration.** When a node starts to degrade, the goal is to move a
+  session off it before it fails rather than after. This is the hard part and the
+  part I am least sure of, since a live shell has real state, but even draining
+  new logins off an unhealthy node ahead of a hard failure is a win.
+- **A real lifecycle for editor sessions.** Browser based VS Code sessions get a
+  defined lifecycle: provisioned on connect, resource capped like everything
+  else, and cleaned up when the user leaves instead of lingering and leaking
+  resources.
+
+None of this replaces what Open OnDemand already does well. The delta I care
+about is treating the login tier like production: isolation, fairness, and the
+ability to lose a node without losing everyone's session. It is early, and I
+will write it up properly once it runs.
 
 ## What changed
 

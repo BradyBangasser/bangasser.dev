@@ -17,6 +17,7 @@ export interface PostFrontmatter {
   type: PostType;
   draft?: boolean;
   coverImage?: string;
+  coverAlt?: string;
 }
 
 export interface Post extends PostFrontmatter {
@@ -37,6 +38,7 @@ export interface ProjectFrontmatter {
   externalUrl?: string;
   draft?: boolean;
   coverImage?: string;
+  coverAlt?: string;
   featured?: boolean;
 }
 
