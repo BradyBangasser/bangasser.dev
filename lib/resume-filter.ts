@@ -264,7 +264,10 @@ export function assemble(
   return {
     meta: frame.meta, headline: frame.headline, summary: frame.summary,
     education, experience, projects, skills, interests: frame.interests,
-    conferences: frame.conferences, density,
+    // Conferences rank below relevant projects: on the space-constrained
+    // one-page layout, projects and experience take the room and conferences
+    // is dropped. It shows on two-page and full.
+    conferences: length === "onepage" ? [] : frame.conferences, density,
   };
 }
 

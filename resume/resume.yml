@@ -342,7 +342,7 @@ experience:
         priority: 3
 
   - id: caribou-coffee
-    weight: 3
+    weight: 1
     title: "Manager"
     org: "Caribou Coffee"
     location: "White Bear Lake, MN"
