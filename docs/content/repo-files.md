@@ -91,14 +91,20 @@ project and competes in the resume builder by score (give it a `weight`).
 # .resume.yml  - omit or set `resume: false` to opt out
 name: "Erid: Cloud Images"
 period: "2026"
-weight: 7
-tags: [cloud, sre]
+weight: 7            # base weight (1-10); competes by weight x recency
+start: "2026-01"     # optional; drives the recency multiplier
+tags: [cloud, sre]   # which resume presets this project appears on
+strict: true         # optional; pin to ONLY the tagged presets (no borrowing)
 tech: [Packer, Terraform]
 bullets:
   - text: "Reproducible golden images across five clouds."
     tags: [cloud, sre]
     priority: 1
 ```
+
+By default a project can be borrowed onto a roomier resume it is not tagged for,
+to help fill the page. Set `strict: true` to pin it to only its tagged presets,
+for example a project you want on the sales resume and nowhere else.
 
 ## .related.txt
 

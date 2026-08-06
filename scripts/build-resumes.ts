@@ -63,7 +63,10 @@ function mergeRepoResumeEntries(master: any): void {
       tech: entry.tech ?? [],
       bullets,
     };
+    if (entry.weight !== undefined) proj.weight = entry.weight;
+    if (entry.start !== undefined) proj.start = entry.start;
     if (entry.pin !== undefined) proj.pin = entry.pin;
+    if (entry.strict !== undefined) proj.strict = entry.strict;
     const i = master.projects.findIndex((p: any) => p.id === proj.id);
     if (i >= 0) master.projects[i] = proj;
     else master.projects.push(proj);

@@ -208,13 +208,13 @@ export function buildPool(master: Master, preset: string): { frame: Frame; units
   const frame: Frame = { meta: master.meta, headline: p?.headline ?? "", summary: p?.summary ?? "", education, skills, interests };
 
   const expUnits: Unit[] = (master.experience ?? []).map((x: any) => ({
-    kind: "experience", id: x.id ?? x.org, score: entryScore(x), onPreset: hasTag(x.tags, preset, "twopage"),
+    kind: "experience", id: x.id ?? x.org, score: entryScore(x), onPreset: hasTag(x.tags, preset, "twopage"), strict: x.strict === true,
     head: { title: x.title, org: x.org, location: x.location ?? "", dates: dateRange(x.start ?? "", x.end ?? "") },
     sortKey: `${x.end === "present" ? "9999-99" : (x.end ?? "")}|${x.start ?? ""}`,
     bullets: orderBullets(x.bullets, preset),
   }));
   const projUnits: Unit[] = (master.projects ?? []).map((pr: any) => ({
-    kind: "project", id: pr.id ?? pr.name, score: entryScore(pr), onPreset: hasTag(pr.tags, preset, "twopage"),
+    kind: "project", id: pr.id ?? pr.name, score: entryScore(pr), onPreset: hasTag(pr.tags, preset, "twopage"), strict: pr.strict === true,
     head: { name: pr.name, period: pr.period ?? "", tech: pr.tech ?? [] },
     sortKey: `${pr.period ?? ""}|`,
     bullets: orderBullets(pr.bullets, preset),
@@ -222,6 +222,7 @@ export function buildPool(master: Master, preset: string): { frame: Frame; units
 
   const units = [...expUnits, ...projUnits]
     .filter((u) => u.bullets.length >= 2)
+    .filter((u: any) => u.onPreset || !u.strict)
     .sort((a, b) => Number(b.onPreset) - Number(a.onPreset) || b.score - a.score);
   return { frame, units };
 }
