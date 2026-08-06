@@ -177,6 +177,7 @@ export type Unit = {
 export type Frame = {
   meta: any; headline: string; summary: string;
   education: any[]; skills: { group: string; items: string[] }[]; interests: string;
+  conferences: any[];
 };
 
 function orderBullets(bullets: Bullet[], preset: string): PoolBullet[] {
@@ -203,9 +204,16 @@ export function buildPool(master: Master, preset: string): { frame: Frame; units
       const items = (g.items ?? []).filter((i: any) => hasTag(i.tags, preset, "twopage")).map((i: any) => i.name);
       return items.length ? { group: g.group, items } : null;
     }).filter(Boolean) as any[];
+  const conferences = [...(master.conferences ?? [])].sort(bySortKeyDesc)
+    .filter((c: any) => hasTag(c.tags, preset, "twopage"))
+    .map((c: any) => ({
+      event: c.event, role: c.role ?? "", location: c.location ?? "",
+      dates: dateRange(c.start ?? "", c.end ?? ""),
+      lines: (c.notes ?? []).filter((n: any) => hasTag(n.tags, preset, "twopage")).map((n: any) => n.text),
+    }));
   const intr = master.interests;
   const interests = intr && hasTag(intr.tags, preset, "twopage") ? intr.text : "";
-  const frame: Frame = { meta: master.meta, headline: p?.headline ?? "", summary: p?.summary ?? "", education, skills, interests };
+  const frame: Frame = { meta: master.meta, headline: p?.headline ?? "", summary: p?.summary ?? "", education, skills, interests, conferences };
 
   const expUnits: Unit[] = (master.experience ?? []).map((x: any) => ({
     kind: "experience", id: x.id ?? x.org, score: entryScore(x), onPreset: hasTag(x.tags, preset, "twopage"), strict: x.strict === true,
@@ -255,7 +263,8 @@ export function assemble(
   const education = frame.education.map((e) => ({ ...e, minors: length === "onepage" ? "" : e.minors }));
   return {
     meta: frame.meta, headline: frame.headline, summary: frame.summary,
-    education, experience, projects, skills, interests: frame.interests, density,
+    education, experience, projects, skills, interests: frame.interests,
+    conferences: frame.conferences, density,
   };
 }
 

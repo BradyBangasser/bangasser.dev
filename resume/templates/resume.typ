@@ -80,6 +80,10 @@
     if m.location != "" { items.push([#m.location]) }
     items.join(sep)
   }
+  #if m.at("availability", default: "") != "" {
+    v(4pt)
+    text(size: 9pt, weight: 600, fill: accent)[#m.availability]
+  }
 ]
 #v(5pt)
 #line(length: 100%, stroke: 0.7pt + accent)
@@ -123,6 +127,17 @@
         e.degree + (if sb.len() > 0 { "   \u{b7}   " + sb.join("  \u{b7}  ") } else { "" }),
         e.location, e.dates),
       e.lines,
+    )
+  }
+}
+// ---- conferences -----------------------------------------------------------
+#if data.at("conferences", default: ()).len() > 0 {
+  section("Conferences")
+  for (i, c) in data.conferences.enumerate() {
+    if i > 0 { v(ENTRY_GAP) }
+    entry(
+      colhead(c.event, c.role, c.location, c.dates),
+      c.lines,
     )
   }
 }

@@ -26,6 +26,7 @@ meta:
   location: "Saint Paul, MN"
   email: "brady@bangasser.dev"
   phone: "(651) 769-5301"
+  availability: "Available for full-time roles starting May 2027"
   links:
     website: "www.bangasser.dev"
     github: "github.com/BradyBangasser"
@@ -124,63 +125,40 @@ experience:
     pin: 2
     tags: [sre, software, compilers, sales]
     bullets:
-      - text: "Built AI failure analysis into a custom CI/CD build harness that root-causes failed builds from logs with an internal model, then delivered it to three engineering teams."
+      - text: "Cut PHYP firmware and software build times 17% by reworking Jenkins/Groovy CI/CD pipelines with smart Git prefetching and de-duplicated fetches."
+        tags: [sre, software]
+        priority: 1
+      - text: "Built a Jenkins pipeline observability tool with auto-generated Markdown and PDF build-failure reports, delivered under strict constraints: air-gapped, firewalled, no root, and full legacy-code support."
+        tags: [sre, software]
+        priority: 1
+      - text: "Added an AI failure-analysis step to a custom build harness that root-causes failed builds from logs with an IBM internal model and reports next steps, rerun-safety, likely causes, and escalation contacts, speeding incident triage."
+        tags: [sre, software, sales]
+        priority: 1
+      - text: "Automated Jenkins resource tracking and right-sized the executor pool, cutting executor count and improving build performance without adding hardware."
+        tags: [sre, software]
+        priority: 1
+      - text: "Cut firmware and software build time 17% and communicated the pipeline changes across the PHYP organization."
         tags: [sales]
         priority: 1
-      - text: "Cut firmware and software build time 17% through smart Git prefetching, and communicated the pipeline changes across the PHYP organization."
-        tags: [sales]
+      - text: "Contributed to compiler-modernization planning for the department, advocating for LLVM/Clang and reasoning through migration trade-offs and risks."
+        tags: [compilers, software]
+        priority: 1
+      - text: "Shipped the pipeline to three teams and designed it to be extensible across the entire PHYP development department."
+        tags: [sre, software, sales]
         priority: 2
-      # pipeline modernization + build-time win (same topic, per-target wording)
-      - text: "Cut PHYP firmware/software build times 17% by reworking Jenkins/Groovy CI/CD pipelines with smart Git prefetching and by eliminating redundant double-fetches."
-        tags: [sre]
-        priority: 1
-      - text: "Re-engineered PHYP firmware and software build pipelines (Jenkins, Groovy, Python, Perl, Bash), improving build time 17% through smart Git prefetching and de-duplicated fetches."
-        tags: [software]
-        priority: 1
-      # AI failure analysis
-      - text: "Added an AI failure-analysis step to a custom build harness that root-causes failed builds from logs with an IBM internal model, then reports next steps, whether a rerun is safe, likely hardware or network causes, and who to contact, speeding incident triage."
-        tags: [sre]
-        priority: 1
-      - text: "Extended a custom build harness with AI failure analysis: it parses build logs, calls an IBM internal model to root-cause failures, and emits a report with next steps, rerun-safety, and escalation contacts."
-        tags: [software]
-        priority: 1
-      # observability + reports
-      - text: "Added pipeline observability and auto-generated Markdown and PDF build-failure reports so engineers could triage broken builds faster."
-        tags: [sre]
-        priority: 2
-      - text: "Built Markdown and PDF build-failure report generation and richer build observability into the pipeline tooling."
-        tags: [software]
-        priority: 2
-      # scale / extendibility
-      - text: "Shipped the pipeline to 3 teams and designed it to be extensible across the entire PHYP development department."
+      - text: "Integrated the pipeline with secure enterprise build and artifact systems including Artifactory within locked-down constraints."
         tags: [sre, software]
         priority: 2
-      # secure build systems / Artifactory
-      - text: "Integrated pipelines with secure enterprise build and artifact systems including Artifactory, working within locked-down build and deployment constraints."
-        tags: [sre]
-        priority: 3
-      # POWER hardware validation harness
       - text: "Adapted the hardware build-validation harness to the new pipeline and AI analysis, running validation directly on POWER9, POWER10, and POWER11 systems."
-        tags: [sre]
+        tags: [sre, software]
         priority: 3
-      - text: "Modified the hardware build-validation harness to work with the new pipeline and AI failure analysis across POWER9/10/11 systems, collaborating with interns, engineers, and hardware teams."
-        tags: [software]
-        priority: 3
-      # compiler modernization
-      - text: "Contributed to compiler-modernization planning for the department, advocating for LLVM/Clang and reasoning through migration trade-offs and risks."
-        tags: [compilers]
-        priority: 1
-      - text: "Helped shape compiler-modernization direction, pushing for LLVM/Clang and working through the migration trade-offs."
-        tags: [software]
-        priority: 3
-      # legacy code / hypervisor / exposure
       - text: "Worked across large legacy codebases and hypervisor architecture, and gained exposure to IBM Quantum and Cloud."
         tags: [compilers, software]
-        priority: 2
+        priority: 3
 
   - id: isu-sysadmin
     weight: 9
-    title: "System Administrator"
+    title: "Junior System Administrator"
     org: "Iowa State University"
     location: "Ames, IA"
     start: "2025-04"
@@ -193,18 +171,6 @@ experience:
       - text: "Support and troubleshoot researchers' applications, improving accessibility and onboarding with OpenOnDemand."
         tags: [sales]
         priority: 2
-      - text: "Judged three posters at PEARC26; studied hybrid Slurm/Kubernetes scheduling and compute efficiency."
-        tags: [sre]
-        priority: 1
-      - text: "Judged three posters at PEARC26; weighed Slurm/Kubernetes, federated compute, and cloud ML tradeoffs."
-        tags: [cloud]
-        priority: 1
-      - text: "Judged three posters at PEARC26; studied Slurm-on-Kubernetes (Slinky) and shared-node scheduling."
-        tags: [hpc, compilers]
-        priority: 1
-      - text: "Judged three student posters at PEARC26 on HPC scheduling and research computing."
-        tags: [software, sales]
-        priority: 1
       - text: "Operate and maintain a production HPC cluster with SLURM, Kubernetes, Active Directory, Ansible, Prometheus, and Apptainer, keeping it secure and available for a large user base."
         tags: [sre, cloud, hpc]
         priority: 1
@@ -232,7 +198,7 @@ experience:
 
   - id: deere-cloudsec
     weight: 9
-    title: "Cloud Security Engineer"
+    title: "Student Cloud Security Engineer"
     org: "John Deere"
     location: "Johnston, IA"
     start: "2025-05"
@@ -240,27 +206,30 @@ experience:
     pin: 1
     tags: [cloud, sre, software, sales]
     bullets:
-      - text: "Migrated IAM and security tooling from Python to Go for a ~10x performance gain that cut AWS Lambda costs, and presented the results to drive team adoption."
-        tags: [sales]
+      - text: "Contributed to post-mortems for several company-wide outages with multi-hour restore times, helping trace root cause and reduce the chance of recurrence."
+        tags: [sre, cloud, sales]
         priority: 1
-      - text: "Built tooling that verified 100,000+ AWS and Azure resources against policy and NIST standards, coordinating across security, cloud, and development stakeholders."
-        tags: [sales]
+      - text: "Deployed Go and Python compliance scanners on AWS EKS that audited both cloud configuration and running instances across the estate."
+        tags: [cloud, sre, software]
+        priority: 1
+      - text: "Led a migration of IAM, security, and developer-management tooling from Python to Go for a ~10x performance gain that cut AWS Lambda runtime costs, and presented the results to drive team adoption."
+        tags: [cloud, software, sre, sales]
+        priority: 1
+      - text: "Built tooling that continuously audited 100,000+ AWS and Azure resources against company policy, NIST, and the Deere internal standard, coordinating across security, cloud, and development stakeholders."
+        tags: [cloud, sre, sales]
+        priority: 1
+      - text: "Built Grafana dashboards showing the count and general location of non-compliant resources, directing where the team focused remediation."
+        tags: [sre, cloud, software]
         priority: 2
-      - text: "Built tooling that continuously audited 100,000+ AWS and Azure resources against company policy, NIST standards, and platform best practices."
-        tags: [cloud, sre]
-        priority: 1
-      - text: "Wrote automated remediation for common misconfigurations flagged across the cloud estate."
-        tags: [cloud, sre]
+      - text: "Tracked compliance findings and remediation against NIST and the Deere standard through ServiceNow, coordinating across security and cloud teams."
+        tags: [cloud, sales, sre]
         priority: 2
       - text: "Designed and managed least-privilege IAM policies in AWS to tighten cloud access control."
         tags: [cloud, sre]
-        priority: 1
-      - text: "Led a migration of IAM, security, and dev-management tooling from Python to Go, a ~10x performance gain that cut AWS Lambda runtime costs by roughly the same factor."
-        tags: [cloud, software, sre]
-        priority: 2
-      - text: "Deployed high-throughput Go services on AWS EKS to run compliance checks across the cloud estate."
-        tags: [cloud, software, sre]
-        priority: 2
+        priority: 3
+      - text: "Wrote automated remediation for common misconfigurations flagged across the cloud estate."
+        tags: [cloud, sre]
+        priority: 3
 
   - id: isu-research-compilers
     weight: 8
@@ -663,3 +632,17 @@ skills:
 interests:
   text: "Aviation (flying small aircraft), rock climbing"
   tags: [full]
+
+# -----------------------------------------------------------------------------
+# Conferences and service
+# -----------------------------------------------------------------------------
+conferences:
+  - event: "PEARC26 (Practice and Experience in Advanced Research Computing)"
+    role: "Student Poster Judge"
+    location: "Minneapolis, MN"
+    start: "2026-07"
+    end: "2026-07"
+    tags: [all]
+    notes:
+      - text: "Judged three student posters on technical merit, reproducibility, and presentation, representing Iowa State Research IT."
+        tags: [all]

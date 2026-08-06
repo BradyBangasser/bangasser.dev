@@ -47,6 +47,7 @@
   #let c = (m.email, m.phone, m.links.website, m.links.github, m.links.linkedin, m.location).filter(x => x != none and x != "")
   #v(3pt)
   #text(size: 9pt, fill: sub)[#c.join("   |   ")]
+  #if m.at("availability", default: "") != "" { v(2pt); text(size: 9.5pt, weight: 700)[#m.availability] }
 ]
 #v(4pt)
 #if data.summary != "" [ #text(size: 10pt)[#data.summary] ]
@@ -83,6 +84,18 @@
         headrow(text(weight: 700, size: 10.5pt)[#e.degree, #e.school], e.dates)
         if sb.len() > 0 { v(1pt); text(size: 9.5pt, fill: sub)[#sb.join("  \u{b7}  ")] }
       }, e.lines)
+    }
+  })
+}
+#if data.at("conferences", default: ()).len() > 0 {
+  section("Conferences", {
+    for (i, c) in data.conferences.enumerate() {
+      if i > 0 { v(ENTRY_GAP) }
+      entry({
+        headrow(text(weight: 700, size: 10.5pt)[#c.event], c.dates)
+        let sub2 = (c.role, c.location).filter(x => x != "")
+        if sub2.len() > 0 { v(1pt); text(size: 9.5pt, fill: sub)[#sub2.join("  \u{b7}  ")] }
+      }, c.lines)
     }
   })
 }
