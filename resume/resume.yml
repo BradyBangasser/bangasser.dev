@@ -95,7 +95,7 @@ education:
     notes:
       - text: "Concurrent B.S./M.S. program"
         tags: [all]
-      - text: "Coursework: Advanced Topics in High Performance Computing, Distributed Systems and Middleware, Data Security in Machine Learning, Network Design and Security"
+      - text: "Coursework: Advanced Topics in High Performance Computing, Distributed Systems and Middleware, Quantum Information and Complexity, Compilers and Programming Languages, Theory of Computation, Data Security in Machine Learning, Network Design and Security"
         tags: [sre, hpc, cloud, compilers]
   - school: "Iowa State University"
     location: "Ames, IA"
@@ -246,7 +246,7 @@ experience:
       - text: "Wrote an LLVM optimization pass that breaks opaque OpenMP runtime calls into discrete IR instructions, pruning redundant host-GPU data movement without destabilizing kernels."
         tags: [compilers, hpc]
         priority: 1
-      - text: "Built a dynamic profiling library that correlates OpenMP target logs with IR metadata to surface duplicate transfers and unused memory automatically; initial testing showed ~10% performance gains from the profiling-guided optimizations."
+      - text: "Built a dynamic profiling library that correlates OpenMP target logs with IR metadata to surface duplicate transfers and unused memory automatically; testing showed an average of 7% performance gains from the profiling-guided optimizations."
         tags: [compilers, hpc]
         priority: 2
       - text: "Co-developed an LLVM-based tool that restructures disk I/O access patterns to speed up data loading for large ML/AI workloads."
@@ -268,7 +268,7 @@ experience:
       - text: "Designed and trained object-classification models with PyTorch and OpenCV, tuning data preprocessing and tensor operations to cut training latency without losing accuracy."
         tags: [software, hpc]
         priority: 1
-      - text: "Probed model robustness by building adversarial exploit methods, then designed defenses to harden the models against them."
+      - text: "Developed and tested techniques to refine and defend vision-based perception models against adversarial attacks used on self-driving vehicles."
         tags: [software, cloud]
         priority: 1
       - text: "Tested perception models on self-driving vehicles to catch false and failed classifications."
@@ -290,10 +290,10 @@ experience:
       - text: "Translate networking trade-offs for non-technical teammates and keep the group aligned on priorities."
         tags: [sales]
         priority: 3
-      - text: "Designed, built, and tested the internal network for a competition mining robot, ensuring redundant control and telemetry throughout each arena run."
+      - text: "Designed and operated a fiber backbone network for the COSMIC competition, benchmarked at over 100 Gbps, carrying redundant robot command, control, and telemetry."
         tags: [sre]
         priority: 1
-      - text: "Collected multiple camera streams and relayed them to a third-party platform for live judging."
+      - text: "Streamed multiple IP cameras alongside robot control and telemetry over the network for live operation and judging."
         tags: [sre, software]
         priority: 2
       - text: "Hardened networking equipment against wireless interference, dust, and physical damage in the competition arena."
@@ -315,7 +315,7 @@ experience:
       - text: "Built a ground-station TUI in C to visualize live telemetry from the airframe during flights."
         tags: [software]
         priority: 2
-      - text: "Designed a custom telemetry protocol for encrypted data routing over a mesh network, handling sensitive data across multiple interfaces at once."
+      - text: "Designed and built a modular telemetry protocol and visualization platform with a team of non-CS members, successfully communicating with the rocket in flight."
         tags: [software, cloud]
         priority: 2
 
@@ -328,10 +328,10 @@ experience:
     end: "2024-08"
     tags: [hpc, sre]
     bullets:
-      - text: "Built and configured two bare-metal HPC clusters from scratch: networking, custom DNS and routing, user management, and SLURM job scheduling with VMware and Debian."
+      - text: "Built, tested, and operated an experimental 64-node HPC cluster built exclusively from ARM machines, including a large distributed visualization system."
         tags: [hpc, sre]
         priority: 1
-      - text: "Implemented a wildfire simulation in OpenMP, CUDA, C, and Fortran to benchmark cluster performance across heterogeneous compute."
+      - text: "Stood up the full operations stack from scratch: SLURM scheduling, Prometheus and Grafana monitoring, Entra identity, and Postgres."
         tags: [hpc, compilers]
         priority: 2
       - text: "Developed a self-healing IoT sensor mesh network to detect earthquakes, landslides, and flash floods in remote regions."
