@@ -281,7 +281,7 @@ experience:
     org: "Cardinal Space Mining"
     location: "Ames, IA"
     start: "2024-08"
-    end: "present"
+    end: "2026-01"
     tags: [sre, software, sales]
     bullets:
       - text: "Lead the networking sub-team, coordinating design and integration across sub-teams toward competition deadlines."
@@ -306,7 +306,7 @@ experience:
     org: "Cyclone Rocketry"
     location: "Ames, IA"
     start: "2024-08"
-    end: "2025-05"
+    end: "2025-06"
     tags: [software, sre]
     bullets:
       - text: "Built modular software to control and acquire data from airframe instruments, improving reliability and maintainability."

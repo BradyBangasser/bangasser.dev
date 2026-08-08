@@ -140,8 +140,15 @@ function main() {
       return { data: assemble(frame, sel, 1.0, length), pages: pagesAt(1.0) };
     }
 
+    // Guarantee at least one project on every resume: reserve a slot for the
+    // highest-scoring project before the score-order fill, so experiences cannot
+    // crowd projects out entirely.
+    const topProj = sel.find((s) => s.unit.kind === "project");
+    if (topProj) topProj.n = Math.min(2, topProj.unit.bullets.length);
+
     // Phase 1: admit each unit (score order) with its two best bullets if it fits.
     for (const s of sel) {
+      if (s === topProj) continue; // already reserved
       s.n = Math.min(2, s.unit.bullets.length);
       if (pagesAt(1.0) > target) s.n = 0;
     }
